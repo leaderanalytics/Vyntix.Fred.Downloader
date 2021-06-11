@@ -1,7 +1,7 @@
 ﻿dotnet tool install --global dotnet-ef
 
 To add Migrations:
-	Delete files and folders under Downloader.Services/Migrations
+	Delete files and folders under Downloader.Services/Database/Migrations
 	Open SQL Server Management Studio and/or MySQL Workbench. Delete (drop) FREDLocal database.
 	
 	Note startup-project parameter for each dotnet ef command below.  Modify it if necessary.

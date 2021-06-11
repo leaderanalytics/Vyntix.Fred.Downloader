@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Downloader.Services.Database.Migrations.MySQL
 {
     [DbContext(typeof(Db_MySQL))]
-    [Migration("20210416190353_CreateDatabase")]
+    [Migration("20210611133301_CreateDatabase")]
     partial class CreateDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -17,7 +17,7 @@ namespace Downloader.Services.Database.Migrations.MySQL
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.5");
+                .HasAnnotation("ProductVersion", "5.0.7");
 
             modelBuilder.Entity("LeaderAnalytics.Vyntix.Fred.Model.Category", b =>
                 {
@@ -28,16 +28,16 @@ namespace Downloader.Services.Database.Migrations.MySQL
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(400)
-                        .HasColumnType("varchar(400) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(400)");
 
                     b.Property<string>("NativeID")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("ParentID")
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("ID");
 
@@ -53,7 +53,7 @@ namespace Downloader.Services.Database.Migrations.MySQL
                     b.Property<string>("CategoryID")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(0)");
@@ -61,15 +61,15 @@ namespace Downloader.Services.Database.Migrations.MySQL
                     b.Property<string>("GroupID")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Popularity")
                         .HasColumnType("int");
@@ -91,11 +91,11 @@ namespace Downloader.Services.Database.Migrations.MySQL
                     b.Property<string>("Symbol")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Value")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime>("VintageDate")
                         .HasColumnType("datetime(0)");
@@ -118,12 +118,12 @@ namespace Downloader.Services.Database.Migrations.MySQL
                     b.Property<string>("CategoryID")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("RelatedCategoryID")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("ID");
 
@@ -141,24 +141,24 @@ namespace Downloader.Services.Database.Migrations.MySQL
 
                     b.Property<string>("Link")
                         .HasMaxLength(400)
-                        .HasColumnType("varchar(400) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(400)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(400)
-                        .HasColumnType("varchar(400) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(400)");
 
                     b.Property<string>("NativeID")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("RTStart")
                         .HasColumnType("datetime(0)");
 
                     b.Property<string>("SourceNativeID")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.HasKey("ID");
 
@@ -175,7 +175,7 @@ namespace Downloader.Services.Database.Migrations.MySQL
                         .HasColumnType("datetime(0)");
 
                     b.Property<string>("ReleaseID")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.HasKey("ID");
 
@@ -190,14 +190,14 @@ namespace Downloader.Services.Database.Migrations.MySQL
 
                     b.Property<string>("Frequency")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("LastUpdated")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Popularity")
                         .HasColumnType("int");
@@ -206,25 +206,25 @@ namespace Downloader.Services.Database.Migrations.MySQL
                         .HasColumnType("datetime(0)");
 
                     b.Property<string>("ReleaseID")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("SeasonalAdj")
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Symbol")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(400)
-                        .HasColumnType("varchar(400) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(400)");
 
                     b.Property<string>("Units")
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("ID");
 
@@ -242,12 +242,12 @@ namespace Downloader.Services.Database.Migrations.MySQL
                     b.Property<string>("CategoryID")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Symbol")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(50)");
 
                     b.HasKey("ID");
 
@@ -266,15 +266,15 @@ namespace Downloader.Services.Database.Migrations.MySQL
                     b.Property<string>("GroupID")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(400)
-                        .HasColumnType("varchar(400) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(400)");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Popularity")
                         .HasColumnType("int");
@@ -282,7 +282,7 @@ namespace Downloader.Services.Database.Migrations.MySQL
                     b.Property<string>("Symbol")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(50)");
 
                     b.HasKey("ID");
 
@@ -297,18 +297,18 @@ namespace Downloader.Services.Database.Migrations.MySQL
 
                     b.Property<string>("Link")
                         .HasMaxLength(400)
-                        .HasColumnType("varchar(400) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(400)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(400)
-                        .HasColumnType("varchar(400) CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(400)");
 
                     b.Property<string>("NativeID")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.HasKey("ID");
 
