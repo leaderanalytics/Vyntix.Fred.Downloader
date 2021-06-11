@@ -1,0 +1,22 @@
+﻿<h3>Observation Table</h3>
+<h3>@Symbol</h3>
+
+
+
+
+@code {
+    [Parameter] public string Symbol { get; set; }
+    [Parameter] public EventCallback<string> SymbolChanged { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadObservations();
+    }
+
+
+    private async Task LoadObservations()
+    {
+        
+
+    }
+}

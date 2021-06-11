@@ -1,0 +1,73 @@
+﻿@namespace Downloader.Blazor.Client.Shared
+@inherits MudTable<T>
+@using MudBlazor
+@using MudBlazor.Extensions
+@using MudBlazor.Utilities
+@typeparam T
+
+<div @attributes="UserAttributes" class="@Classname" style="@Style">
+    <CascadingValue Value="TableContext" IsFixed="true">
+        <div class="mud-table-container" style="@TableStyle">
+            <table class="mud-table-root">
+                @if (DisplayColumnHeaders && (ColumnHeaders?.Any() ?? false))
+                {
+                    <thead class="mud-table-head">
+                        <MudTr IsHeader="true" IsCheckable="MultiSelection" IsEditable="false" IsCheckedChanged="@OnHeaderCheckboxClicked" @ref="TableContext.HeaderRow">
+                            @*Add a placeholder column header cell for the first column which will be row headers*@
+                            @if (DisplayRowHeaders)
+                            {
+                                <MudTh>@string.Empty</MudTh>
+                            }
+
+                            @foreach (T colHeader in GetColumnHeaders())
+                            {
+                                if (AllowColumnSorting)
+                                {
+                                    <MudTh><MudTableSortLabel SortLabel="column" T="T">@colHeader.DisplayValue</MudTableSortLabel></MudTh>
+                                }
+                                else
+                                {
+                                    <MudTh>@colHeader.DisplayValue</MudTh>
+                                }
+                            }
+                        </MudTr>
+                    </thead>
+                }
+                <tbody class="mud-table-body">
+                    @if (CurrentPageItems != null)
+                    {
+                        var rowIndex = 0;
+                        @foreach (T rowHeader in CurrentPageItems)
+                        {
+                            var rowClass = new CssBuilder(RowClass).AddClass(RowClassFunc?.Invoke(rowHeader, rowIndex)).Build();
+                            var rowStyle = new StyleBuilder().AddStyle(RowStyle).AddStyle(RowStyleFunc?.Invoke(rowHeader, rowIndex)).Build();
+                            <MudTr Class="@rowClass" Style="@rowStyle" Item="rowHeader" @key="rowHeader" IsCheckable="MultiSelection" IsEditable="RowEditingTemplate != null" IsCheckedChanged="@((value) => { var x = rowHeader; OnRowCheckboxChanged(value, x); })">
+                                @if (DisplayRowHeaders)
+                                {
+                                    @if (AllowRowSorting)
+                                    {
+                                        <MudTd><MudTableSortLabel SortLabel="column" T="T">@rowHeader.DisplayValue</MudTableSortLabel></MudTd>
+                                    }
+                                    else
+                                    {
+                                        <MudTd>@rowHeader.DisplayValue</MudTd>
+                                    }
+                                }
+
+                                @foreach (MudMatrixCell cell in GetRowData(rowHeader))
+                                {
+                                    <MudTd>@cell.Value</MudTd>
+                                }
+                            </MudTr>
+                            @if (ChildRowContent != null)
+                            {
+                                @ChildRowContent(rowHeader)
+                            }
+                            rowIndex++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </CascadingValue>
+</div>

@@ -1,0 +1,46 @@
+﻿@page "/obsViewer/{symbol}"
+
+<MudLayout>
+    <MudPaper Outlined="true" Class="d-flex mt-5 mb-5 pa-3 justify-space-around">
+        <MudLink href="@($"seriesViewer")">
+            <ChildContent>
+                <MudButton StartIcon="@Icons.Filled.ArrowBackIos" Variant="Variant.Filled" Color="Color.Default" Style="text-transform:none">Series</MudButton>
+            </ChildContent>
+        </MudLink>
+        <MudButton Variant="Variant.Filled" EndIcon="@Icons.Custom.FileFormats.FileExcel" Color="Color.Default" Style="text-transform:none">Excel</MudButton>
+        <div class="d-flex justify-content-center align-content-center">
+            <MudRadioGroup @bind-SelectedOption="@dense" Class="d-flex justify-content-center align-content-center">
+                <MudRadio Color="Color.Primary" Option="@(true)">Dense</MudRadio>
+                <MudRadio Color="Color.Primary" Option="@(false)">Sparse</MudRadio>
+            </MudRadioGroup>
+        </div>
+    </MudPaper>
+    <CascadingValue Value="@observations" Name="observations">
+        <MudTabs Elevation="1" Rounded="true" PanelClass="pa-6">
+            <MudTabPanel Text="Table" ToolTip="Tabular view of vintages">
+                <ObsTable @bind-Symbol="@symbol" />
+            </MudTabPanel>
+            <MudTabPanel Text="List" ToolTip="Vertical list of vintages">
+                <ObsList @bind-Symbol="@symbol" />
+            </MudTabPanel>
+            <MudTabPanel Text="Statistics" ToolTip="Summary information">
+                <SeriesStats />
+            </MudTabPanel>
+        </MudTabs>
+    </CascadingValue>
+</MudLayout>
+
+
+@code {
+    [Inject] IDialogService DialogService { get; set; }
+    [Inject] IAdaptiveClient<IDownloaderServices> serviceClient { get; set; }
+    [Parameter] public string symbol { get; set; }
+    private bool dense { get; set; } = true;
+    public List<Observation> observations { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        observations = await serviceClient.CallAsync(x => x.ObservationsService.GetLocalObservations(symbol));
+    }
+}
