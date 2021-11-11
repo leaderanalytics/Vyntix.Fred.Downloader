@@ -15,7 +15,6 @@
             </MudRadioGroup>
         </div>
     </MudPaper>
-    <CascadingValue Value="@observations" Name="observations">
         <MudTabs Elevation="1" Rounded="true" PanelClass="pa-6">
             <MudTabPanel Text="Table" ToolTip="Tabular view of vintages">
                 <ObsPivotTable @bind-Symbol="@symbol" />
@@ -27,7 +26,6 @@
                 <SeriesStats />
             </MudTabPanel>
         </MudTabs>
-    </CascadingValue>
 </MudLayout>
 
 
@@ -36,11 +34,9 @@
     [Inject] IAdaptiveClient<IDownloaderServices> serviceClient { get; set; }
     [Parameter] public string symbol { get; set; }
     private bool dense { get; set; } = true;
-    public List<Observation> observations { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
-        observations = await serviceClient.CallAsync(x => x.ObservationsService.GetLocalObservations(symbol));
     }
 }
