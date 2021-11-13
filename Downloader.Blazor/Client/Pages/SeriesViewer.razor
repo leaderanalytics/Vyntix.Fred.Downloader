@@ -11,7 +11,7 @@
     <MudTable ServerData="@(new Func<TableState, Task<TableData<Series>>>(LoadSeries))" Dense="true" Hover="true" MultiSelection="true" @bind-SelectedItems="selectedItems" @ref="seriesTable">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Local Series</MudText>
-            <MudToolBarSpacer />
+            <MudSpacer />
             <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
