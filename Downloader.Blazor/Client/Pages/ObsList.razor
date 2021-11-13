@@ -20,8 +20,8 @@
 @code {
 
     [Inject] IAdaptiveClient<IDownloaderServices> serviceClient { get; set; }
-    [Parameter] public string Symbol { get; set; }
-    [Parameter] public EventCallback<string> SymbolChanged { get; set; }
+    [Parameter] public IEnumerable<Observation> obs { get; set; }
+    [Parameter] public EventCallback<IEnumerable<Observation>> obsChanged { get; set; }
 
 
 
@@ -41,9 +41,8 @@
         // https://github.com/dotnet/aspnetcore/issues/30070
 
         //await MessageService.ShowLoading();
-        IEnumerable<Observation> obs = await serviceClient.CallAsync(x => x.ObservationsService.GetLocalObservations(Symbol, tableState.Page * tableState.PageSize, tableState.PageSize));
         //await MessageService.HideLoading();
-        return new TableData<Observation> { TotalItems = 100, Items = obs };
+        return new TableData<Observation> { TotalItems = obs.Count(), Items = obs };
     }
 
 }
