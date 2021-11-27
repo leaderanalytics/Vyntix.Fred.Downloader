@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LeaderAnalytics.LeaderPivot.Blazor" Version="1.0.13-beta.1" />
     <PackageReference Include="LeaderAnalytics.Vyntix.Fred.Model" Version="1.0.10-beta.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.12" PrivateAssets="all" />
@@ -34,6 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\LeaderPivot.Blazor\LeaderPivot.Blazor\LeaderPivot.Blazor.csproj" />
     <ProjectReference Include="..\..\Downloader.APIClient\Downloader.APIClient.csproj" />
     <ProjectReference Include="..\Shared\Downloader.Blazor.Shared.csproj" />
   </ItemGroup>

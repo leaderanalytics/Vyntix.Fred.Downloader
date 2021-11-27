@@ -16,11 +16,11 @@
         </div>
     </MudPaper>
         <MudTabs Elevation="1" Rounded="true" PanelClass="pa-6">
-            <MudTabPanel Text="Pivot Table" ToolTip="Matrix view of observations">
-                <ObsPivotTable @bind-Symbol="@symbol" />
+            <MudTabPanel Text="List" ToolTip="List of observations" >
+                <ObsList @bind-obs="obs" />
             </MudTabPanel>
-            <MudTabPanel Text="List" ToolTip="List of observations">
-                <ObsList @bind-obs="@obs" />
+            <MudTabPanel Text="Pivot Table" ToolTip="Matrix view of observations">
+                <ObsPivotTable @bind-obs="obs" />
             </MudTabPanel>
             <MudTabPanel Text="Statistics" ToolTip="Summary information">
                 <SeriesStats />
@@ -34,13 +34,23 @@
     [Inject] IAdaptiveClient<IDownloaderServices> serviceClient { get; set; }
     [Parameter] public string symbol { get; set; }
     private bool dense { get; set; } = true;
-    private IEnumerable<Observation> obs;
+    private IEnumerable<Observation> obs { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        obs = await serviceClient.CallAsync(x => x.ObservationsService.GetLocalObservations(symbol));
-        int x = 1;
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+        if (firstRender)
+        {
+            obs = await serviceClient.CallAsync(x => x.ObservationsService.GetLocalObservations(symbol));
+        }
+
     }
 }

@@ -48,3 +48,15 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+/**https://stackoverflow.com/questions/68884700/create-a-scrollable-container-for-a-table-without-fixed-size-that-also-prevents**/
+
+#pivot-container {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: auto;
+    min-height: 0;
+    min-width: 0;
+}
+
