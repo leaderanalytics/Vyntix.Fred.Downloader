@@ -15,6 +15,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Linq;
 using System.IO;
+using LeaderAnalytics.LeaderPivot.Blazor;
 
 namespace Downloader.Blazor.Client
 {
@@ -45,6 +46,7 @@ namespace Downloader.Blazor.Client
 
             builder.Services.AddSingleton<MessageService>();
             builder.Services.AddMudServices();
+            builder.Services.AddLeaderPivot();
             await builder.Build().RunAsync();
         }
     }

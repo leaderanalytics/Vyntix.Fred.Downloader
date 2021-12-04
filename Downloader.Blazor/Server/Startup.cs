@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
 using LeaderAnalytics.Vyntix.Fred.FredClient;
+using LeaderAnalytics.LeaderPivot.Blazor;
 
 namespace Downloader.Blazor.Server
 {
@@ -31,6 +32,7 @@ namespace Downloader.Blazor.Server
             services.AddFredClient()
                 .UseAPIKey(apiKey)
                 .UseConfig(x => new FredClientConfig { MaxDownloadRetries = 1 });
+            services.AddLeaderPivot();
         }
 
         public void ConfigureContainer(ContainerBuilder builder)

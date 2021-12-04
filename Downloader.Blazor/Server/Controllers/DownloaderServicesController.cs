@@ -32,6 +32,14 @@ namespace Downloader.Blazor.Server.Controllers
             return ep as EndPointConfiguration;
         }
 
+
+        [HttpGet("GetAllLocalObservations/{symbol}")]
+        public async Task<JsonResult> GetAllLocalObservations(string symbol)
+        {
+            var data = await serviceClient.CallAsync(x => x.ObservationsService.GetLocalObservations(symbol));
+            return new JsonResult(data);
+        }
+
         [HttpGet("GetLocalObservations/{symbol}/{skip}/{take}")]
         public async Task<JsonResult> GetLocalObservations(string symbol, int skip, int take)
         {

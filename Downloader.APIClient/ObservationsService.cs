@@ -20,21 +20,12 @@ namespace Downloader.APIClient
 
         public async Task<List<Observation>> GetLocalObservations(string symbol, int skip, int take)
         {
-            try
-            {
-                return (await httpClient.GetFromJsonAsync<IEnumerable<Observation>>($"DownloaderServices/GetLocalObservations/{symbol}/{skip}/{take}"))?.ToList();
-            }
-            catch (Exception ex)
-            {
-                string y = ex.Message;
-                return null;
-            }
+            return (await httpClient.GetFromJsonAsync<IEnumerable<Observation>>($"DownloaderServices/GetLocalObservations/{symbol}/{skip}/{take}"))?.ToList();
         }
-
 
         public async Task<List<Observation>> GetLocalObservations(string symbol)
         {
-            return (await httpClient.GetFromJsonAsync<IEnumerable<Observation>>($"DownloaderServices/GetLocalObservations/{symbol}"))?.ToList();
+            return (await httpClient.GetFromJsonAsync<IEnumerable<Observation>>($"DownloaderServices/GetAllLocalObservations/{symbol}"))?.ToList();
         }
 
         public async Task<RowOpResult> UpdateLocalObservations(string symbol)

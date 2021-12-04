@@ -5,7 +5,6 @@
         <MudTh><MudTableSortLabel SortLabel="vintage_date_field" T="Observation">Vintage Date</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel SortLabel="obsdate_field" T="Observation">Obs Date</MudTableSortLabel></MudTh>
         <MudTh><MudTableSortLabel SortLabel="value_field" T="Observation">Value</MudTableSortLabel></MudTh>
-        
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Vintage Date">@context.VintageDate.ToString("MM/dd/yyyy")</MudTd>
@@ -18,8 +17,8 @@
 </MudTable>
 
 @code {
-
-    [Inject] IAdaptiveClient<IDownloaderServices> serviceClient { get; set; }
+    
+    
     [Parameter] public IEnumerable<Observation> obs { get; set; }
     [Parameter] public EventCallback<IEnumerable<Observation>> obsChanged { get; set; }
 
@@ -35,6 +34,12 @@
         await base.OnAfterRenderAsync(firstRender);
     }
 
+    private void OnobsChanged(ChangeEventArgs e)
+    {
+        int junk = 1;
+    }
+
+
     private async Task<TableData<Observation>> LoadObservations(TableState tableState)
     {
         // Uncomment ShowLoading when this issue is fixed
@@ -42,6 +47,11 @@
 
         //await MessageService.ShowLoading();
         //await MessageService.HideLoading();
+
+        if (obs == null)
+            return new TableData<Observation>();
+
+        int junk = obs.Count();
         return new TableData<Observation> { TotalItems = obs.Count(), Items = obs };
     }
 
