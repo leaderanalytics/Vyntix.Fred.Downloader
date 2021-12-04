@@ -11,15 +11,12 @@
             <MudIconButton Icon="@Icons.Material.Filled.Brightness4" Color="Color.Inherit" OnClick="@((e) => DarkMode())" />
         </MudTooltip>
     </MudAppBar>
-    <MudDrawerContainer>
-        <MudDrawer @bind-Open="_drawerOpen" Elevation="25" Class="" Variant="DrawerVariant.Temporary" DisableOverlay="false">
-            <MudDrawerHeader Class="" LinkToIndex="true">
-                Logo here
-            </MudDrawerHeader>
-            <NavMenu @ref="@_navMenuRef" />
-
-        </MudDrawer>
-    </MudDrawerContainer>
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="25" Class="" Variant="DrawerVariant.Temporary" DisableOverlay="false">
+        <MudDrawerHeader Class="" LinkToIndex="true">
+            Logo here
+        </MudDrawerHeader>
+        <NavMenu @ref="@_navMenuRef" />
+    </MudDrawer>
     <MudMainContent>
         @Body
     </MudMainContent>

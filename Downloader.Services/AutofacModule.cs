@@ -1,28 +1,17 @@
-﻿using Autofac;
-using Downloader.Blazor.Shared;
-using LeaderAnalytics.AdaptiveClient;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿namespace Downloader.Services;
 
-namespace Downloader.Services
+public class AutofacModule : Autofac.Module
 {
-    public class AutofacModule : Autofac.Module
+    protected override void Load(ContainerBuilder builder)
     {
-        protected override void Load(ContainerBuilder builder)
-        {
-            base.Load(builder);
+        base.Load(builder);
 
-            // Autofac & AdaptiveClient
+        // Autofac & AdaptiveClient
 
-            // Don't forget to do this:
-            builder.RegisterModule(new LeaderAnalytics.AdaptiveClient.EntityFrameworkCore.AutofacModule());
+        // Don't forget to do this:
+        builder.RegisterModule(new LeaderAnalytics.AdaptiveClient.EntityFrameworkCore.AutofacModule());
 
-            RegistrationHelper registrationHelper = new RegistrationHelper(builder);
-            registrationHelper.RegisterModule(new AdaptiveClientModule());
-        }
+        RegistrationHelper registrationHelper = new RegistrationHelper(builder);
+        registrationHelper.RegisterModule(new AdaptiveClientModule());
     }
 }

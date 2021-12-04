@@ -1,0 +1,11 @@
+﻿global using Autofac;
+global using Autofac.Extensions.DependencyInjection;
+global using Downloader.Blazor.Shared;
+global using Downloader.Blazor.Shared.FREDLocal;
+global using LeaderAnalytics.AdaptiveClient;
+global using LeaderAnalytics.LeaderPivot.Blazor;
+global using LeaderAnalytics.Vyntix.Fred.FredClient;
+global using Microsoft.AspNetCore.Mvc;
+global using Serilog;
+global using Serilog.Events;
+global using System.Reflection;

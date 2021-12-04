@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31112.23
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Downloader.Blazor.Server", "Downloader.Blazor\Server\Downloader.Blazor.Server.csproj", "{67F22EB3-380F-48B6-9B9D-2C383C16D8DE}"
 EndProject
@@ -16,10 +16,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Downloader.Tests", "Downloader.Tests\Downloader.Tests.csproj", "{CC917E33-6F55-4675-B719-F4F91CA6FE49}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Downloader.APIClient", "Downloader.APIClient\Downloader.APIClient.csproj", "{CC032924-D7BE-479F-ACEC-C2C941DBB52D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaderPivot.Blazor", "..\LeaderPivot.Blazor\LeaderPivot.Blazor\LeaderPivot.Blazor.csproj", "{5B2E3696-3F65-4947-8666-EB9E18E0B2E2}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaderPivot", "..\LeaderPivot\LeaderPivot\LeaderPivot.csproj", "{0AE1D368-9F43-4E5D-83AB-978C3C337DD1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,14 +51,6 @@ Global
 		{CC032924-D7BE-479F-ACEC-C2C941DBB52D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC032924-D7BE-479F-ACEC-C2C941DBB52D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC032924-D7BE-479F-ACEC-C2C941DBB52D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5B2E3696-3F65-4947-8666-EB9E18E0B2E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B2E3696-3F65-4947-8666-EB9E18E0B2E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B2E3696-3F65-4947-8666-EB9E18E0B2E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B2E3696-3F65-4947-8666-EB9E18E0B2E2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0AE1D368-9F43-4E5D-83AB-978C3C337DD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0AE1D368-9F43-4E5D-83AB-978C3C337DD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0AE1D368-9F43-4E5D-83AB-978C3C337DD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0AE1D368-9F43-4E5D-83AB-978C3C337DD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
