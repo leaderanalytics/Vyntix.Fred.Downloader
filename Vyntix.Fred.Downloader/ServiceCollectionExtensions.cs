@@ -4,18 +4,11 @@ using System.Net;
 
 namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
-public static class ObserverFredServiceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
-    public static RegistrationValues AddObserverFredServices(this ContainerBuilder containerBuilder, IEnumerable<IEndPointConfiguration> endpoints) => new RegistrationValues(containerBuilder, endpoints);
+    public static RegistrationValues AddFredDownloaderServices(this ContainerBuilder containerBuilder, IEnumerable<IEndPointConfiguration> endpoints) => new RegistrationValues(containerBuilder, endpoints);
 }
 
-public static class FredClientServiceCollectionExtensions
-{
-    public static LeaderAnalytics.Vyntix.Fred.FredClient.RegistrationValues AddFredClient(this IServiceCollection services)
-    { 
-        return LeaderAnalytics.Vyntix.Fred.FredClient.FredClientServiceCollectionExtensions.AddFredClient(services);
-    }
-}
 
 public class RegistrationValues
 {

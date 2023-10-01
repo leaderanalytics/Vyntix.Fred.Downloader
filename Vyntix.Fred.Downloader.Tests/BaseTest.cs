@@ -41,13 +41,12 @@ public abstract class BaseTest
                 .UseConfig(x => new FredClientConfig { MaxDownloadRetries = 3 }); 
                 
                 // Setting MaxDownloadRetries to 1 will cause FredClient to abort on the first 429 error
+                
             })
             .UseServiceProviderFactory(new AutofacServiceProviderFactory())
             .ConfigureContainer<ContainerBuilder>((config, containerBuilder) =>
             {
-                RegistrationHelper registrationHelper = new RegistrationHelper(containerBuilder);
-                registrationHelper.RegisterModule(new LeaderAnalytics.Vyntix.Fred.Downloader.AdaptiveClientModule(endPoints));
-                containerBuilder.RegisterModule(new LeaderAnalytics.Vyntix.Fred.Downloader.AutofacModule());
+                containerBuilder.AddFredDownloaderServices(endPoints);
             }).Build();
     }
 

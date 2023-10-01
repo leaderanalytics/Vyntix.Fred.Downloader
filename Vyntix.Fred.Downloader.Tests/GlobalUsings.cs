@@ -2,7 +2,7 @@ global using NUnit.Framework;
 global using Autofac;
 global using Autofac.Extensions.DependencyInjection;
 global using LeaderAnalytics.AdaptiveClient;
-//global using LeaderAnalytics.Vyntix.Fred.Downloader;
+global using LeaderAnalytics.Vyntix.Fred.Downloader;
 global using LeaderAnalytics.AdaptiveClient.EntityFrameworkCore;
 global using LeaderAnalytics.Vyntix.Elements;
 global using LeaderAnalytics.Vyntix.Fred.FredClient;
