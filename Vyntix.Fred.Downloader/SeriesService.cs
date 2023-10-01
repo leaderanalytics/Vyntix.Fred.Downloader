@@ -5,7 +5,7 @@ namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public class SeriesService : BaseService, ISeriesService
 {
-    public SeriesService(FREDStagingDb db, IObserverAPI_Manifest serviceManifest,  IFredClient fredClient) : base(db, serviceManifest, fredClient)
+    public SeriesService(FREDStagingDb db, IAPI_Manifest serviceManifest,  IFredClient fredClient) : base(db, serviceManifest, fredClient)
     {
 
     }

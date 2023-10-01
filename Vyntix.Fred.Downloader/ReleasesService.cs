@@ -2,7 +2,7 @@
 
 public class ReleasesService : BaseService, IReleasesService
 {
-    public ReleasesService(FREDStagingDb db, IObserverAPI_Manifest serviceManifest, IFredClient fredClient) : base(db, serviceManifest, fredClient)
+    public ReleasesService(FREDStagingDb db, IAPI_Manifest serviceManifest, IFredClient fredClient) : base(db, serviceManifest, fredClient)
     {
 
     }

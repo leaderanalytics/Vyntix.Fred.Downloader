@@ -1,4 +1,5 @@
 ﻿using LeaderAnalytics.Vyntix.Fred.Domain;
+using LeaderAnalytics.Vyntix.Fred.Domain.Downloader;
 using LeaderAnalytics.Vyntix.Fred.StagingDb;
 using Serilog.Events;
 
@@ -9,7 +10,7 @@ namespace LeaderAnalytics.Vyntix.Fred.Downloader.Tests;
 public abstract class BaseTest
 {
     protected ILifetimeScope scope;
-    protected IAdaptiveClient<IObserverAPI_Manifest> client;
+    protected IAdaptiveClient<IAPI_Manifest> client;
     protected readonly List<IEndPointConfiguration> endPoints;
     protected FREDStagingDb db;
     private IHost host;
@@ -54,7 +55,7 @@ public abstract class BaseTest
     protected virtual async Task Setup()
     {
         scope = host.Services.GetAutofacRoot().BeginLifetimeScope();
-        client = scope.Resolve<IAdaptiveClient<IObserverAPI_Manifest>>();
+        client = scope.Resolve<IAdaptiveClient<IAPI_Manifest>>();
         fredClient = scope.Resolve<IFredClient>();
         ResolutionHelper resolutionHelper = scope.Resolve<ResolutionHelper>();
         EndPoint = endPoints.First(x => x.API_Name == API_Name.FRED_Staging && x.ProviderName == CurrentProviderName);

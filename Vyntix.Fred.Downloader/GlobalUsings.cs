@@ -4,6 +4,7 @@ global using LeaderAnalytics.AdaptiveClient;
 global using LeaderAnalytics.AdaptiveClient.EntityFrameworkCore;
 global using LeaderAnalytics.AdaptiveClient.Utilities;
 global using LeaderAnalytics.Vyntix.Fred.Domain;
+global using LeaderAnalytics.Vyntix.Fred.Domain.Downloader;
 global using LeaderAnalytics.Vyntix.Fred.StagingDb;
 global using LeaderAnalytics.Vyntix.Fred.Model;
 global using Microsoft.EntityFrameworkCore;

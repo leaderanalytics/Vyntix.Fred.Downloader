@@ -4,7 +4,7 @@ namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public class ObservationsService : BaseService, IObservationsService
 {
-    public ObservationsService(FREDStagingDb db, IObserverAPI_Manifest downloaderServices, IFredClient fredClient) : base(db, downloaderServices, fredClient)
+    public ObservationsService(FREDStagingDb db, IAPI_Manifest downloaderServices, IFredClient fredClient) : base(db, downloaderServices, fredClient)
     {
     }
 

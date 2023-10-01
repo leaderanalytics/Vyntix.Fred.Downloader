@@ -1,6 +1,6 @@
 ﻿namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
-public class API_Manifest : ServiceManifestFactory, IObserverAPI_Manifest
+public class API_Manifest : ServiceManifestFactory, IAPI_Manifest
 {
     public IObservationsService ObservationsService => Create<IObservationsService>();
     public IReleasesService ReleasesService => Create<IReleasesService>();

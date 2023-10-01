@@ -2,7 +2,7 @@
 
 public class CategoriesService : BaseService, ICategoriesService
 {
-    public CategoriesService(FREDStagingDb db, IObserverAPI_Manifest downloaderServices, IFredClient fredClient) : base(db, downloaderServices, fredClient)
+    public CategoriesService(FREDStagingDb db, IAPI_Manifest downloaderServices, IFredClient fredClient) : base(db, downloaderServices, fredClient)
     {
 
     }

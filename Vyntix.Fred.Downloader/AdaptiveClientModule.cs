@@ -36,8 +36,8 @@ public class AdaptiveClientModule : IAdaptiveClientModule
             .RegisterDatabaseInitializer<DatabaseInitializer>(API_Name.FRED_Staging, DatabaseProviderName.MySQL)
 
             // Service Manifests
-            .RegisterServiceManifest<API_Manifest, IObserverAPI_Manifest>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MSSQL)
-            .RegisterServiceManifest<API_Manifest, IObserverAPI_Manifest>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MySQL)
+            .RegisterServiceManifest<API_Manifest, IAPI_Manifest>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MSSQL)
+            .RegisterServiceManifest<API_Manifest, IAPI_Manifest>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MySQL)
 
             // Services - MSSQL
             .RegisterService<CategoriesService, ICategoriesService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MSSQL)
