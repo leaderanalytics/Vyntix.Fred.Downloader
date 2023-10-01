@@ -1,8 +1,0 @@
-﻿Relative paths using ~ is not supported
-
-
-Hot Reload:  Open a command line in the server folder and run 
-dotnet watch run
-See https://github.com/dotnet/aspnetcore/issues/5456#issuecomment-584219488
-
-

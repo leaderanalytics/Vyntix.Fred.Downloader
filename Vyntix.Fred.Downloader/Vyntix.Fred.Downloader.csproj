@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <IncludeSymbols>true</IncludeSymbols>
+	  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	  <Authors>Leader Analytics</Authors>
+	  <Company>Leader Analytics</Company>
+	  <Product>Vyntix.Fred.Downloader</Product>
+	  <Description>Fred Download services for Vyntix and related products</Description>
+	  <Copyright>2023 Leader Analytics</Copyright>
+	  <PackageProjectUrl>https://github.com/leaderanalytics/Vyntix.Fred.FredClient</PackageProjectUrl>
+	  <PackageIcon>VyntixLogo.png</PackageIcon>
+	  <RepositoryUrl>https://leaderanalytics.visualstudio.com/Vyntix.Fred.Downloader/_git/Vyntix.Fred.Downloader</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageTags>Fred Download services for Vyntix</PackageTags>
+	  <PackageReleaseNotes>See Repository</PackageReleaseNotes>
+	  <PackageId>LeaderAnalytics.Vyntix.Fred.Downloader</PackageId>
+	  <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+  </PropertyGroup>
+
+	<PropertyGroup>
+		<RootNamespace>LeaderAnalytics.Vyntix.Fred.Downloader</RootNamespace>
+		<AssemblyName>LeaderAnalytics.Vyntix.Fred.Downloader</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\VyntixLogo.png" Pack="true" PackagePath="\" />
+		<None Include="..\LICENSE.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AdaptiveClient" Version="4.0.7" />
+		<PackageReference Include="AdaptiveClient.EntityFrameworkCore" Version="4.0.4" />
+		<PackageReference Include="AdaptiveClient.Utilities" Version="4.0.3" />
+		<PackageReference Include="LeaderAnalytics.Vyntix.Fred.Domain" Version="2.0.8" />
+		<PackageReference Include="LeaderAnalytics.Vyntix.Fred.FredClient" Version="1.2.1" />
+		<PackageReference Include="LeaderAnalytics.Vyntix.Fred.StagingDb" Version="1.1.3" />
+	</ItemGroup>
+</Project>

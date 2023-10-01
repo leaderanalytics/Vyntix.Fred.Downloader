@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vyntix.Fred.Downloader", "Vyntix.Fred.Downloader\Vyntix.Fred.Downloader.csproj", "{D227DA1D-2C50-42CD-B980-C8B960A8F5AC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vyntix.Fred.Downloader.Tests", "Vyntix.Fred.Downloader.Tests\Vyntix.Fred.Downloader.Tests.csproj", "{F0E39725-7CCC-438E-931D-B572C49AE15B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29794EE9-657B-43CF-9770-A4F0C3CD3AA3}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		version.json = version.json
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D227DA1D-2C50-42CD-B980-C8B960A8F5AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D227DA1D-2C50-42CD-B980-C8B960A8F5AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D227DA1D-2C50-42CD-B980-C8B960A8F5AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D227DA1D-2C50-42CD-B980-C8B960A8F5AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0E39725-7CCC-438E-931D-B572C49AE15B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0E39725-7CCC-438E-931D-B572C49AE15B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0E39725-7CCC-438E-931D-B572C49AE15B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0E39725-7CCC-438E-931D-B572C49AE15B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {91C89B30-A59E-414A-8972-B537C089158E}
+	EndGlobalSection
+EndGlobal
