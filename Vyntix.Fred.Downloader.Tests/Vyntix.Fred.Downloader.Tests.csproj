@@ -10,7 +10,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="O:\LeaderAnalytics\Config\Vyntix.Fred.FredClient\Test\appsettings.development.json" Link="appsettings.development.json">
+		<Content Include="O:\LeaderAnalytics\Config\Vyntix.Fred.FredClient\appsettings.development.json" Link="appsettings.development.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
