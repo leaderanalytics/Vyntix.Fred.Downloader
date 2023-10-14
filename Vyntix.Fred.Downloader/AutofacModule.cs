@@ -8,5 +8,6 @@ public class AutofacModule : Autofac.Module
 
         // Don't forget to do this:
         builder.RegisterModule(new LeaderAnalytics.AdaptiveClient.EntityFrameworkCore.AutofacModule());
+        builder.RegisterType<VintageComposerService>();
     }
 }

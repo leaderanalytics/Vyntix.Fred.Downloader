@@ -1,15 +1,20 @@
 ﻿using LeaderAnalytics.Vyntix.Fred.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LeaderAnalytics.Vyntix.Fred.Downloader.Tests;
+
 public class SparseDenseTests : BaseTest
 {
+    private VintageComposerService vintageComposerService;
+
     public SparseDenseTests(string currentProviderName) : base(currentProviderName)
     {
+    }
+
+    [SetUp]
+    protected override async Task Setup()
+    {
+        await base.Setup();
+        vintageComposerService = scope.Resolve<VintageComposerService>();
     }
 
     [Test]

@@ -1,6 +1,7 @@
 ﻿using LeaderAnalytics.Vyntix.Fred.Domain;
 using LeaderAnalytics.Vyntix.Fred.Domain.Downloader;
 using LeaderAnalytics.Vyntix.Fred.StagingDb;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog.Events;
 
 namespace LeaderAnalytics.Vyntix.Fred.Downloader.Tests;
@@ -17,7 +18,7 @@ public abstract class BaseTest
     protected string CurrentProviderName { get; set; }
     protected IEndPointConfiguration EndPoint { get; set; }
     protected IFredClient fredClient;
-
+    protected IServiceCollection services {  get; set; }
 
     public BaseTest(string currentProviderName)
     {
@@ -33,6 +34,8 @@ public abstract class BaseTest
         // Load all endpoints and make them active
         endPoints = EndPointUtilities.LoadEndPoints("appsettings.development.json", false).ToList();
         endPoints.ForEach(x => x.IsActive = true);  // AdaptiveClient only looks at active endpoints
+        
+        
         host = Host.CreateDefaultBuilder()
             .ConfigureHostConfiguration(builder =>  builder.AddJsonFile("appsettings.development.json", false))
             .ConfigureServices((config, services) => {
