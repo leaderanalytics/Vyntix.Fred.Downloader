@@ -19,4 +19,14 @@ public class ObservationsServiceTests : BaseTest
             Assert.AreEqual(dbCount, memCount);
         }
     }
+    
+    [Test]
+    public async Task SeriesStatisticsTest()
+    {
+        string symbol = "GNPCA";
+        await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
+        RowOpResult<SeriesStatistics> stats = await client.CallAsync(x => x.ObservationsService.GetSeriesStatistics(symbol));
+
+
+    }
 }
