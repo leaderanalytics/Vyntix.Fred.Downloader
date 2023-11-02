@@ -3,10 +3,13 @@
 public class ObservationsService : BaseService, IObservationsService
 {
     private Func<string, FREDStagingDb> dbFactory;
+    private IEndPointConfiguration currentEndpoint;
+    private ResolutionHelper resolutionHelper;
 
-    public ObservationsService(FREDStagingDb db, IAPI_Manifest downloaderServices, IFredClient fredClient, Func<string, FREDStagingDb> dbFactory) : base(db, downloaderServices, fredClient)
+    public ObservationsService(FREDStagingDb db, IAPI_Manifest downloaderServices, IFredClient fredClient, IAdaptiveClient<IAPI_Manifest> serviceClient, ResolutionHelper resolutionHelper) : base(db, downloaderServices, fredClient)
     {
-        this.dbFactory = dbFactory;
+        currentEndpoint = serviceClient.CurrentEndPoint ?? throw new NullReferenceException("CurrentEndPoint is null");
+        this.resolutionHelper = resolutionHelper ?? throw new ArgumentNullException(nameof(resolutionHelper));
     }
 
     public async Task<List<RowOpResult>> DownloadObservations(string[] symbols)
@@ -74,15 +77,22 @@ public class ObservationsService : BaseService, IObservationsService
         
         if (!await db.Observations.Where(x => x.Symbol == symbol).AnyAsync())
             return result;
-        
-        string connectionString = db.Database.GetConnectionString();
-        Task<int> obsCountTask = dbFactory(connectionString).Observations.Where(x => x.Symbol == symbol).Select(x => x.ObsDate).Distinct().CountAsync();
-        Task<int> vintCountTask = dbFactory(connectionString).Observations.Where(x => x.Symbol == symbol).Select(x => x.VintageDate).Distinct().CountAsync();
-        Task<int> nullCountTask = dbFactory(connectionString).Observations.Where(x => x.Symbol == symbol && x.Value == null).CountAsync();
-        Task<DateTime> firstVintageDateTask = dbFactory(connectionString).Observations.Where(x => x.Symbol == symbol).MinAsync(x => x.VintageDate);
-        Task<DateTime> lastVintageDateTask = dbFactory(connectionString).Observations.Where(x => x.Symbol == symbol).MaxAsync(x => x.VintageDate);
-        Task<DateTime> firstObsDateTask = dbFactory(connectionString).Observations.Where(x => x.Symbol == symbol).MinAsync(x => x.ObsDate);
-        Task<DateTime> lastObsDateTask = dbFactory(connectionString).Observations.Where(x => x.Symbol == symbol).MaxAsync(x => x.ObsDate);
+
+        FREDStagingDb db1 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
+        FREDStagingDb db2 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
+        FREDStagingDb db3 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
+        FREDStagingDb db4 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
+        FREDStagingDb db5 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
+        FREDStagingDb db6 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
+        FREDStagingDb db7 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
+
+        Task<int> obsCountTask = db1.Observations.Where(x => x.Symbol == symbol).Select(x => x.ObsDate).Distinct().CountAsync();
+        Task<int> vintCountTask = db2.Observations.Where(x => x.Symbol == symbol).Select(x => x.VintageDate).Distinct().CountAsync();
+        Task<int> nullCountTask = db3.Observations.Where(x => x.Symbol == symbol && x.Value == null).CountAsync();
+        Task<DateTime> firstVintageDateTask = db4.Observations.Where(x => x.Symbol == symbol).MinAsync(x => x.VintageDate);
+        Task<DateTime> lastVintageDateTask = db5.Observations.Where(x => x.Symbol == symbol).MaxAsync(x => x.VintageDate);
+        Task<DateTime> firstObsDateTask = db6.Observations.Where(x => x.Symbol == symbol).MinAsync(x => x.ObsDate);
+        Task<DateTime> lastObsDateTask = db7.Observations.Where(x => x.Symbol == symbol).MaxAsync(x => x.ObsDate);
         Task.WaitAll(obsCountTask, vintCountTask, nullCountTask, firstVintageDateTask, lastVintageDateTask, firstObsDateTask, lastObsDateTask);
 
         result.Item.ObservationCount = obsCountTask.Result;

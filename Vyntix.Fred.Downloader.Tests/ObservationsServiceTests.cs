@@ -26,7 +26,8 @@ public class ObservationsServiceTests : BaseTest
         string symbol = "GNPCA";
         await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
         RowOpResult<SeriesStatistics> stats = await client.CallAsync(x => x.ObservationsService.GetSeriesStatistics(symbol));
-
-
+        Assert.IsNotNull(stats);
+        Assert.IsNotNull(stats.Item);
+        Assert.IsTrue(stats.Success);
     }
 }
