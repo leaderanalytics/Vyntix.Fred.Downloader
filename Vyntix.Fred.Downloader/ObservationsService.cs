@@ -85,6 +85,8 @@ public class ObservationsService : BaseService, IObservationsService
         FREDStagingDb db5 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
         FREDStagingDb db6 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
         FREDStagingDb db7 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
+        FREDStagingDb db8 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
+        FREDStagingDb db9 = resolutionHelper.ResolveDbContext(currentEndpoint) as FREDStagingDb;
 
         Task<int> obsCountTask = db1.Observations.Where(x => x.Symbol == symbol).Select(x => x.ObsDate).Distinct().CountAsync();
         Task<int> vintCountTask = db2.Observations.Where(x => x.Symbol == symbol).Select(x => x.VintageDate).Distinct().CountAsync();
@@ -93,7 +95,9 @@ public class ObservationsService : BaseService, IObservationsService
         Task<DateTime> lastVintageDateTask = db5.Observations.Where(x => x.Symbol == symbol).MaxAsync(x => x.VintageDate);
         Task<DateTime> firstObsDateTask = db6.Observations.Where(x => x.Symbol == symbol).MinAsync(x => x.ObsDate);
         Task<DateTime> lastObsDateTask = db7.Observations.Where(x => x.Symbol == symbol).MaxAsync(x => x.ObsDate);
-        Task.WaitAll(obsCountTask, vintCountTask, nullCountTask, firstVintageDateTask, lastVintageDateTask, firstObsDateTask, lastObsDateTask);
+        Task<decimal> minValueTask = db8.Observations.Where(x => !string.IsNullOrEmpty(x.Value)).MinAsync(x => Convert.ToDecimal(x.Value));
+        Task<decimal> maxValueTask = db8.Observations.Where(x => !string.IsNullOrEmpty(x.Value)).MaxAsync(x => Convert.ToDecimal(x.Value));
+        Task.WaitAll(obsCountTask, vintCountTask, nullCountTask, firstVintageDateTask, lastVintageDateTask, firstObsDateTask, lastObsDateTask, minValueTask, maxValueTask);
 
         result.Item.ObservationCount = obsCountTask.Result;
         result.Item.VintageCount = vintCountTask.Result;
@@ -102,6 +106,8 @@ public class ObservationsService : BaseService, IObservationsService
         result.Item.LastObservationDate = lastObsDateTask.Result;
         result.Item.FirstVintageDate = firstVintageDateTask.Result;
         result.Item.LastVintageDate = lastVintageDateTask.Result;
+        result.Item.MinValue = minValueTask.Result;
+        result.Item.MaxValue = maxValueTask.Result;
         result.Success = true;
         return result;
     }
