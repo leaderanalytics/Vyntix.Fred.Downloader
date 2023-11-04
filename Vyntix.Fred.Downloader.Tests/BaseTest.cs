@@ -72,4 +72,10 @@ public abstract class BaseTest
         if (!result.DatabaseWasCreated)
             throw new Exception("Database was not created.");
     }
+    [OneTimeTearDown]
+    protected virtual async Task TearDown()
+    { 
+        scope.Dispose();
+        host.Dispose();
+    }
 }
