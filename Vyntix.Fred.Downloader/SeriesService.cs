@@ -239,6 +239,16 @@ public class SeriesService : BaseService, ISeriesService
         return result;
     }
 
+    public async Task<RowOpResult<FredSeries>> GetLocalSeries(string symbol)
+    {
+        RowOpResult<FredSeries> result = new();
+        result.Item = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
+        result.Success = result.Item is not null;
+        return result;
+    }
+
+
+
     public async Task<int> GetSeriesCount() => await db.Series.CountAsync();
 
     public async Task<RowOpResult> DeleteSeries(string symbol)

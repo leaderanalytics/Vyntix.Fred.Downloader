@@ -34,29 +34,29 @@ public abstract class BaseTest
         // Load all endpoints and make them active
         endPoints = EndPointUtilities.LoadEndPoints("appsettings.development.json", false).ToList();
         endPoints.ForEach(x => x.IsActive = true);  // AdaptiveClient only looks at active endpoints
-        
-        
-        host = Host.CreateDefaultBuilder()
-            .ConfigureHostConfiguration(builder =>  builder.AddJsonFile("appsettings.development.json", false))
-            .ConfigureServices((config, services) => {
-                string apiKey = config.Configuration.GetValue<string>("FredAPI_Key");
-                services.AddFredClient()
-                .UseAPIKey(apiKey)
-                .UseConfig(x => new FredClientConfig { MaxDownloadRetries = 3 }); 
-                
-                // Setting MaxDownloadRetries to 1 will cause FredClient to abort on the first 429 error
-                
-            })
-            .UseServiceProviderFactory(new AutofacServiceProviderFactory())
-            .ConfigureContainer<ContainerBuilder>((config, containerBuilder) =>
-            {
-                containerBuilder.AddFredDownloaderServices(endPoints);
-            }).Build();
     }
 
     [SetUp]
+    [OneTimeSetUp]
     protected virtual async Task Setup()
     {
+        host = Host.CreateDefaultBuilder()
+        .ConfigureHostConfiguration(builder => builder.AddJsonFile("appsettings.development.json", false))
+        .ConfigureServices((config, services) => {
+            string apiKey = config.Configuration.GetValue<string>("FredAPI_Key");
+            services.AddFredClient()
+            .UseAPIKey(apiKey)
+            .UseConfig(x => new FredClientConfig { MaxDownloadRetries = 3 });
+
+            // Setting MaxDownloadRetries to 1 will cause FredClient to abort on the first 429 error
+
+        })
+        .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+        .ConfigureContainer<ContainerBuilder>((config, containerBuilder) =>
+        {
+            containerBuilder.AddFredDownloaderServices(endPoints);
+        }).Build();
+
         scope = host.Services.GetAutofacRoot().BeginLifetimeScope();
         client = scope.Resolve<IAdaptiveClient<IAPI_Manifest>>();
         fredClient = scope.Resolve<IFredClient>();
@@ -72,6 +72,8 @@ public abstract class BaseTest
         if (!result.DatabaseWasCreated)
             throw new Exception("Database was not created.");
     }
+
+    [TearDown]
     [OneTimeTearDown]
     protected virtual async Task TearDown()
     { 
