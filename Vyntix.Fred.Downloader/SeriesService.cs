@@ -41,6 +41,7 @@ public class SeriesService : BaseService, ISeriesService
         {
             series.ReleaseID = releaseID;
             result = await SaveSeries(series, true);
+            db.Entry(series).State = EntityState.Detached; // Because in DownloadSeriesIfItDoesNotExist we get this entity again.  See ObservationsServiceTests.cs
         }
         return result;
     }
@@ -128,15 +129,18 @@ public class SeriesService : BaseService, ISeriesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadSeriesIfItDoesNotExist(string symbol)
+    public async Task<RowOpResult<FredSeries>> DownloadSeriesIfItDoesNotExist(string symbol)
     {
         ArgumentException.ThrowIfNullOrEmpty(symbol);
-        RowOpResult result = new RowOpResult();
+        RowOpResult<FredSeries> result = new();
+        result.Item = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
 
-        if (!await db.Series.AnyAsync(x => x.Symbol == symbol))
-            return await DownloadSeries(symbol);
-
-        result.Success = true;
+        if (result.Item is null)
+        {
+            await DownloadSeries(symbol);
+            result.Item = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol); // Needs to be detached
+        }
+        result.Success = result.Item is not null;
         return result;
     }
 

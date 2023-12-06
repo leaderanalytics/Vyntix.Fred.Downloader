@@ -26,26 +26,55 @@ public class ObservationsService : BaseService, IObservationsService
 
     public async Task<RowOpResult> DownloadObservations(string symbol)
     {
-        RowOpResult seriesResult = await serviceManifest.SeriesService.DownloadSeriesIfItDoesNotExist(symbol);
-        
+        RowOpResult result = new();
+        RowOpResult<FredSeries> seriesResult = await serviceManifest.SeriesService.DownloadSeriesIfItDoesNotExist(symbol);
+
         if (!seriesResult.Success)
-            return seriesResult;
-
-        RowOpResult result = new RowOpResult();
-
-        DateTime lastVintageDate = (await db.Observations.Where(x => x.Symbol == symbol).MaxAsync(x => (DateTime?)x.VintageDate)) ?? new DateTime(1776, 7, 3);
-        List<DateTime> vintages = (await fredClient.GetVintageDates(symbol, lastVintageDate.AddDays(1), null));
-
-        if (vintages?.Any() ?? false)
         {
-            List<FredObservation>  observations = await fredClient.GetObservations(symbol, vintages, null, null, DataDensity.Sparse);
+            result.Message = seriesResult.Message;
+            return result;
+        }
 
-            if (observations?.Any() ?? false)
+
+        bool updateSeries = !seriesResult.Item.HasVintages.HasValue; // If HasVintages is null, update it and write it to disk after this operation.
+        List<FredObservation> observations = new(4000);
+        DateTime lastVintageDate = (await db.Observations.Where(x => x.Symbol == symbol).MaxAsync(x => (DateTime?)x.VintageDate))?.AddDays(1) ?? new DateTime(1776, 7, 3);
+
+        if ((!seriesResult.Item.HasVintages.HasValue) || seriesResult.Item.HasVintages.Value)
+        {
+            // HasVintages is null or series has vintages.  When HasVintages is null we default to attempting to download vintages. 
+            APIResult<List<DateTime>> vintageResult = (await fredClient.GetVintageDates(symbol, lastVintageDate, null));
+
+            if (vintageResult.Success)
             {
-                await db.Observations.AddRangeAsync(observations);
-                await db.SaveChangesAsync();
+                // series has vintages
+                seriesResult.Item.HasVintages = true;
+
+                if ((vintageResult.Data?.Any() ?? false))
+                    observations = (await fredClient.GetObservations(symbol, vintageResult.Data, null, null, DataDensity.Sparse)).Data;
+            }
+            else
+            {
+                // series does not have vintages
+                seriesResult.Item.HasVintages = false;
             }
         }
+
+        if (!seriesResult.Item.HasVintages.Value)
+            observations = await fredClient.GetNonVintageObservations(symbol, lastVintageDate, null);
+
+        
+        bool anyObs = observations?.Any() ?? false;
+
+        if (updateSeries)
+            await serviceManifest.SeriesService.SaveSeries(seriesResult.Item, ! anyObs); 
+
+        if (anyObs)
+        {
+            await db.Observations.AddRangeAsync(observations);
+            await db.SaveChangesAsync();
+        }
+        
         result.Success = true;
         return result;
     }

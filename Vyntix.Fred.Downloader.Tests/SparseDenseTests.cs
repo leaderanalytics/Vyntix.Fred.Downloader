@@ -28,8 +28,8 @@ public class SparseDenseTests : BaseTest
         DateTime vintage3 = new(2022, 11, 30);
         DateTime vintage4 = new(2022, 12, 22);
 
-        List<FredObservation> observations = await fredClient.GetObservations(symbol, new List<DateTime> { vintage1, vintage2 }, null, null, DataDensity.Sparse);
-        List<FredObservation> observations2 = await fredClient.GetObservations(symbol, new List<DateTime> { vintage3, vintage4 }, null, null, DataDensity.Sparse);
+        List<FredObservation> observations = (await fredClient.GetObservations(symbol, new List<DateTime> { vintage1, vintage2 }, null, null, DataDensity.Sparse)).Data;
+        List<FredObservation> observations2 = (await fredClient.GetObservations(symbol, new List<DateTime> { vintage3, vintage4 }, null, null, DataDensity.Sparse)).Data;
 
         // Get all four vintages in two seperate chunks
         observations.ForEach(x => x.Symbol = "gdp_2_chunks");
@@ -40,7 +40,7 @@ public class SparseDenseTests : BaseTest
 
 
         // Get all four vintages in one chunk.
-        observations = await fredClient.GetObservations(symbol, new List<DateTime> { vintage1, vintage2, vintage3, vintage4 }, null, null, DataDensity.Sparse);
+        observations = (await fredClient.GetObservations(symbol, new List<DateTime> { vintage1, vintage2, vintage3, vintage4 }, null, null, DataDensity.Sparse)).Data;
         observations.ForEach(x => x.Symbol = "gdp_1_chunk");
         await db.Observations.AddRangeAsync(observations);
         await db.SaveChangesAsync();
