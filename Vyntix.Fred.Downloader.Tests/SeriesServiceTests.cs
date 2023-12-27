@@ -1,5 +1,7 @@
 ﻿
 
+
+
 namespace LeaderAnalytics.Vyntix.Fred.Downloader.Tests;
 
 public class SeriesServiceTests: BaseTest
@@ -15,6 +17,40 @@ public class SeriesServiceTests: BaseTest
         RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol));
         Assert.IsTrue(result.Success);
         Assert.That(db.Series.Count(x => x.Symbol == symbol), Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task DownLoadSeriesAssertHasVintgatesIsTrue()
+    {
+        string symbol = "GNPCA"; // Has vintages
+        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol));
+        Assert.IsTrue(result.Success);
+        FredSeries? s = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
+        Assert.That(s, Is.Not.Null);
+        Assert.That(s.HasVintages.HasValue, Is.False);
+        // Get observations will set HasVintages
+        RowOpResult obsResult = await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
+        Assert.IsTrue(obsResult.Success);
+        s = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
+        Assert.That(s.HasVintages.HasValue, Is.True);
+        Assert.That(s.HasVintages.Value, Is.True);
+    }
+
+    [Test]
+    public async Task DownLoadSeriesAssertHasVintgatesIsFalse()
+    {
+        string symbol = "SP500"; // Does not have vintages
+        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol));
+        Assert.IsTrue(result.Success);
+        FredSeries? s = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
+        Assert.That(s, Is.Not.Null);
+        Assert.That(s.HasVintages.HasValue, Is.False);
+        // Get observations will set HasVintages
+        RowOpResult obsResult = await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
+        Assert.IsTrue(obsResult.Success);
+        s = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
+        Assert.That(s.HasVintages.HasValue, Is.True);
+        Assert.That(s.HasVintages.Value, Is.False);
     }
 
     [Test]

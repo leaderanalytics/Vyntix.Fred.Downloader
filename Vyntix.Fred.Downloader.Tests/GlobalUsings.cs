@@ -8,5 +8,6 @@ global using LeaderAnalytics.Vyntix.Elements;
 global using LeaderAnalytics.Vyntix.Fred.FredClient;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Hosting;
+global using Microsoft.EntityFrameworkCore;
 global using LeaderAnalytics.Vyntix.Fred.Model;
 global using Serilog;
