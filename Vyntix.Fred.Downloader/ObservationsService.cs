@@ -124,8 +124,8 @@ public class ObservationsService : BaseService, IObservationsService
         Task<DateTime> lastVintageDateTask = db5.Observations.Where(x => x.Symbol == symbol).MaxAsync(x => x.VintageDate);
         Task<DateTime> firstObsDateTask = db6.Observations.Where(x => x.Symbol == symbol).MinAsync(x => x.ObsDate);
         Task<DateTime> lastObsDateTask = db7.Observations.Where(x => x.Symbol == symbol).MaxAsync(x => x.ObsDate);
-        Task<decimal> minValueTask = db8.Observations.Where(x => x.Symbol == symbol && !string.IsNullOrEmpty(x.Value)).MinAsync(x => Convert.ToDecimal(x.Value));
-        Task<decimal> maxValueTask = db9.Observations.Where(x => x.Symbol == symbol && !string.IsNullOrEmpty(x.Value)).MaxAsync(x => Convert.ToDecimal(x.Value));
+        Task<decimal> minValueTask = db8.Observations.Where(x => x.Symbol == symbol && x.Value.HasValue).MinAsync(x => x.Value ?? 0);
+        Task<decimal> maxValueTask = db9.Observations.Where(x => x.Symbol == symbol && x.Value.HasValue).MaxAsync(x => x.Value ?? 0);
         Task.WaitAll(obsCountTask, vintCountTask, nullCountTask, firstVintageDateTask, lastVintageDateTask, firstObsDateTask, lastObsDateTask, minValueTask, maxValueTask);
 
         result.Item.ObservationCount = obsCountTask.Result;

@@ -1,8 +1,4 @@
-﻿
-
-
-
-namespace LeaderAnalytics.Vyntix.Fred.Downloader.Tests;
+﻿namespace LeaderAnalytics.Vyntix.Fred.Downloader.Tests;
 
 public class SeriesServiceTests: BaseTest
 {
