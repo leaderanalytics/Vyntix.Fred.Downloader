@@ -34,9 +34,7 @@ public class ObservationsService : BaseService, IObservationsService
             result.Message = seriesResult.Message;
             return result;
         }
-
-
-        bool updateSeries = !seriesResult.Item.HasVintages.HasValue; // If HasVintages is null, update it and write it to disk after this operation.
+        
         List<FredObservation> observations = new(4000);
         DateTime lastVintageDate = (await db.Observations.Where(x => x.Symbol == symbol).MaxAsync(x => (DateTime?)x.VintageDate))?.AddDays(1) ?? new DateTime(1776, 7, 4);
 
@@ -66,8 +64,8 @@ public class ObservationsService : BaseService, IObservationsService
         
         bool anyObs = observations?.Any() ?? false;
 
-        if (updateSeries)
-            await serviceManifest.SeriesService.SaveSeries(seriesResult.Item, ! anyObs); 
+        seriesResult.Item.LastObsCheck = DateTime.Now.ToUniversalTime();
+        await serviceManifest.SeriesService.SaveSeries(seriesResult.Item, ! anyObs); 
 
         if (anyObs)
         {

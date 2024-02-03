@@ -33,6 +33,16 @@ public class ObservationsServiceTests : BaseTest
         Assert.IsTrue(stats.Success);
     }
 
+    [Test]
+    public async Task LastUpdateTest()
+    {
+        string symbol = "CORESTICKM159SFRBATL";
+        await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
+        DateTime lastObsCheck = db.Series.First(x => x.Symbol == symbol).LastObsCheck;
+        Assert.That(lastObsCheck > DateTime.Now.AddMinutes(-5));
+    }
+
+
     //[Test]
     public async Task CrashEFWithChangeTrackingError()
     {

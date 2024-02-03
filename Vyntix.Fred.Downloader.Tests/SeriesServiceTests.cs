@@ -13,6 +13,7 @@ public class SeriesServiceTests: BaseTest
         RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol));
         Assert.IsTrue(result.Success);
         Assert.That(db.Series.Count(x => x.Symbol == symbol), Is.EqualTo(1));
+        Assert.That(db.Series.Where(x => x.Symbol == symbol).All(x => x.LastMetadataCheck > DateTime.MinValue));
     }
 
     [Test]

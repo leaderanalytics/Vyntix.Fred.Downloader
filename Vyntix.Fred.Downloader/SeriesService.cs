@@ -40,6 +40,7 @@ public class SeriesService : BaseService, ISeriesService
         else
         {
             series.ReleaseID = releaseID;
+            series.LastMetadataCheck = DateTime.Now.ToUniversalTime(); // Don't put this in SaveSeries because we may save a series after user edits - which may not include an update check from FRED.
             result = await SaveSeries(series, true);
             db.Entry(series).State = EntityState.Detached; // Because in DownloadSeriesIfItDoesNotExist we get this entity again.  See ObservationsServiceTests.cs
         }
