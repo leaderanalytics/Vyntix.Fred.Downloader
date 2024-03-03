@@ -47,29 +47,7 @@ public class SeriesService : BaseService, ISeriesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadCategoriesForSeries(string symbol)
-    {
-        ArgumentNullException.ThrowIfNullOrEmpty(symbol);
-        RowOpResult seriesResult = await DownloadSeriesIfItDoesNotExist(symbol);
-        
-        if (!seriesResult.Success)
-            return seriesResult;
-        
-        RowOpResult result = new RowOpResult();
-        List<FredCategory> categores = await fredClient.GetCategoriesForSeries(symbol);
-        
-        if (categores?.Any() ?? false)
-        {
-            foreach (FredCategory category in categores)
-            {
-                FredSeriesCategory seriesCategory = new FredSeriesCategory { Symbol = symbol, CategoryID = category.NativeID };
-                await SaveSeriesCategory(seriesCategory, false);
-            }
-            await db.SaveChangesAsync();
-            result.Success = true;
-        }
-        return result;
-    }
+  
 
     public async Task<RowOpResult> DownloadSeriesRelease(string symbol)
     {
@@ -233,26 +211,45 @@ public class SeriesService : BaseService, ISeriesService
         return result;
     }
 
-    public async Task<RowOpResult<List<FredSeries>>> GetLocalSeries(int skip, int take, string searchTitle)
+    public async Task<List<FredSeries>> GetLocalSeries(string? searchSymbol = null, string? searchTitle = null, string? sortExpression = null, bool sortAscending = true, int skip = 0, int take = int.MaxValue)
     {
-        RowOpResult<List<FredSeries>> result = new();
-        result.Item = await db.Series
-            .Where(x => string.IsNullOrEmpty(searchTitle) || x.Title.Contains(searchTitle))
-            .OrderBy(x => x.Symbol).Skip(skip).Take(take).ToListAsync();
+        var query = db.Series
+            .Where(x => (string.IsNullOrEmpty(searchTitle) || x.Title.Contains(searchTitle)) && (string.IsNullOrEmpty(searchSymbol) || x.Symbol.Contains(searchSymbol)));
 
-        result.Success = true;
+        query = sortExpression switch
+        {
+            nameof(FredSeries.Title) => query.SortBy(x => x.Title, sortAscending),
+            nameof(FredSeries.Frequency) => query.SortBy(x => x.Frequency, sortAscending),
+            nameof(FredSeries.Units) => query.SortBy(x => x.Units, sortAscending),
+            nameof(FredSeries.SeasonalAdj) => query.SortBy(x => x.SeasonalAdj, sortAscending),
+            _ => query.SortBy(x => x.Symbol, sortAscending)
+        };
+
+        List<FredSeries> result = await query.Skip(skip).Take(take).ToListAsync();
         return result;
     }
 
-    public async Task<RowOpResult<FredSeries>> GetLocalSeries(string symbol)
+    public async Task<List<FredSeries>> GetLocalSeriesForCategory(string? symbol = null, string? titleSearchExpression = null,  string? categoryID = null, string? sortExpression = null,  bool sortAscending = true,  int skip = 0, int take = int.MaxValue)
     {
-        RowOpResult<FredSeries> result = new();
-        result.Item = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
-        result.Success = result.Item is not null;
-        return result;
+        var query = from sc in db.SeriesCategories
+                    join s in db.Series on sc.Symbol equals s.Symbol
+                    join c in db.Categories on sc.CategoryID equals c.NativeID
+                    where 
+                        (string.IsNullOrEmpty(symbol) || s.Symbol == symbol)
+                        && (string.IsNullOrEmpty(categoryID) || sc.CategoryID == categoryID)
+                        && (string.IsNullOrEmpty(titleSearchExpression) || c.Name.Contains(titleSearchExpression, StringComparison.InvariantCultureIgnoreCase))
+                    select s;
+
+
+        query = sortExpression switch
+        {
+            nameof(FredSeries.Symbol) => query.SortBy(x => x.Symbol, sortAscending),
+            _ => query.SortBy(x => x.Title, sortAscending)
+        };
+        query = query.Skip(skip).Take(take);
+
+        return await query.ToListAsync();
     }
-
-
 
     public async Task<int> GetSeriesCount() => await db.Series.CountAsync();
 

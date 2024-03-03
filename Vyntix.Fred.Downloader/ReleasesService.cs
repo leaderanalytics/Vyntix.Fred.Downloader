@@ -1,4 +1,6 @@
-﻿namespace LeaderAnalytics.Vyntix.Fred.Downloader;
+﻿using Microsoft.Identity.Client;
+
+namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public class ReleasesService : BaseService, IReleasesService
 {
@@ -11,7 +13,7 @@ public class ReleasesService : BaseService, IReleasesService
     {
         RowOpResult result = new RowOpResult();
         List<FredRelease> releases = await fredClient.GetAllReleases();
-
+        
         if (releases?.Any() ?? false)
         {
             foreach (FredRelease release in releases)
@@ -103,6 +105,13 @@ public class ReleasesService : BaseService, IReleasesService
             result.Success = true;
         }
         return result;
+    }
+
+    public async Task<RowOpResult> DownloadReleaseForSeries(string symbol, bool saveChanges = true)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(symbol);
+        FredRelease release = await fredClient.GetReleaseForSeries(symbol);
+        return await SaveRelease(release, saveChanges);
     }
 
     public async Task<RowOpResult> DownloadReleaseSources(string releaseID)

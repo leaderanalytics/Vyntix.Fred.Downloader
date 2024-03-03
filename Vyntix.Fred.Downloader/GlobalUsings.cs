@@ -1,4 +1,5 @@
 ﻿global using Autofac;
+global using LeaderAnalytics.Core;
 global using LeaderAnalytics.Vyntix.Elements;
 global using LeaderAnalytics.AdaptiveClient;
 global using LeaderAnalytics.AdaptiveClient.EntityFrameworkCore;

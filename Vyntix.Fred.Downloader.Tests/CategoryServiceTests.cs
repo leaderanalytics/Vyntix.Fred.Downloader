@@ -50,4 +50,13 @@ public class CategoryServiceTests : BaseTest
         Assert.IsTrue(result.Success);
         Assert.That(db.CategoryTags.Count(x => x.CategoryID == id) > 20);
     }
+
+    [Test]
+    public async Task DownloadCategoriesForSeriesTest()
+    {
+        string symbol = "EXJPUS";
+        RowOpResult result = await client.CallAsync(x => x.CategoriesService.DownloadCategoriesForSeries(symbol));
+        Assert.IsTrue(result.Success);
+        Assert.That(db.SeriesCategories.Count(x => x.Symbol == symbol), Is.EqualTo(2));
+    }
 }

@@ -1,4 +1,5 @@
-﻿namespace LeaderAnalytics.Vyntix.Fred.Downloader;
+﻿using LeaderAnalytics.Core;
+namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public class CategoriesService : BaseService, ICategoriesService
 {
@@ -53,7 +54,7 @@ public class CategoriesService : BaseService, ICategoriesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadCategorySeries(string categoryID)
+    public async Task<RowOpResult> DownloadCategorySeries(string categoryID, bool includeDiscontinued = false)
     {
         ArgumentNullException.ThrowIfNull(categoryID);
         RowOpResult result = new RowOpResult();
@@ -67,7 +68,7 @@ public class CategoriesService : BaseService, ICategoriesService
                 return categoryResult;
         }
 
-        List<FredSeries> series = await fredClient.GetSeriesForCategory(categoryID, true);
+        List<FredSeries> series = await fredClient.GetSeriesForCategory(categoryID, includeDiscontinued);
 
         if (series?.Any() ?? false)
         {
@@ -80,6 +81,31 @@ public class CategoriesService : BaseService, ICategoriesService
             await db.SaveChangesAsync();
         }
         result.Success = true;
+        return result;
+    }
+
+    public async Task<RowOpResult> DownloadCategoriesForSeries(string symbol)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(symbol);
+        RowOpResult seriesResult = await serviceManifest.SeriesService.DownloadSeriesIfItDoesNotExist(symbol);
+
+        if (!seriesResult.Success)
+            return seriesResult;
+
+        RowOpResult result = new RowOpResult();
+        List<FredCategory> categores = await fredClient.GetCategoriesForSeries(symbol);
+
+        if (categores?.Any() ?? false)
+        {
+            foreach (FredCategory category in categores)
+            {
+                FredSeriesCategory seriesCategory = new FredSeriesCategory { Symbol = symbol, CategoryID = category.NativeID };
+                await serviceManifest.SeriesService.SaveSeriesCategory(seriesCategory, false);
+                await SaveCategory(category, false);
+            }
+            await db.SaveChangesAsync();
+            result.Success = true;
+        }
         return result;
     }
 
@@ -110,6 +136,14 @@ public class CategoriesService : BaseService, ICategoriesService
             throw new Exception($"{nameof(category.Name)} is required.");
 
         RowOpResult result = new RowOpResult();
+
+        if (category.NativeID == "0" && category.ParentID == "0")
+        {
+            // This is a placeholder returned by Fred.  Dont save it because it could cause recursion problems because id = parentID
+            result.Success = true;
+            return result;
+        }
+
         FredCategory? dupe = db.Categories.FirstOrDefault(x => x.ID != category.ID && x.NativeID == category.NativeID);
 
         if (dupe is not null)
@@ -179,5 +213,46 @@ public class CategoriesService : BaseService, ICategoriesService
         }
      
         return result;
+    }
+
+    public async Task<List<FredCategory>> GetLocalChildCategories(string? parentID, bool sortAscending = true, string searchExpression = null, int skip = 0, int take = int.MaxValue)
+    {
+        return await db.Categories
+            .Where(x => x.ParentID == parentID && (string.IsNullOrEmpty(searchExpression) || x.Name.Contains(searchExpression, StringComparison.InvariantCultureIgnoreCase)))
+            .SortBy(x => x.Name, sortAscending)
+            .Skip(skip).Take(take)
+            .ToListAsync();
+    }
+
+    public async Task<List<FredCategory>> GetLocalCategoriesForSeries(string symbol)
+    {
+        var query = from sc in db.SeriesCategories 
+                    join c in db.Categories on sc.CategoryID equals c.NativeID
+                    where sc.Symbol == symbol
+                    select c;
+
+        return await query.ToListAsync();
+    }
+
+
+
+    /// <summary>
+    /// A Categroy Node is a collection of sub-categories and series for a parent node.
+    /// </summary>
+    /// <param name="categoryID"></param>
+    /// <returns></returns>
+    public async Task<List<Node>> GetCategoryNodes(string? categoryID, bool sortAscending = true, string searchExpression = null, int skip = 0, int take = int.MaxValue)
+    {
+        List<Node> nodes = new();
+        List<FredCategory> categories = await GetLocalChildCategories(categoryID, sortAscending, searchExpression);
+        List<FredSeries> series = await serviceManifest.SeriesService.GetLocalSeriesForCategory(null, searchExpression, categoryID, nameof(FredSeries.Title), sortAscending);
+
+        foreach (FredCategory category in categories ?? Enumerable.Empty<FredCategory>()) 
+            nodes.Add(new Node(category, categoryID));
+
+        foreach (FredSeries s in series ?? Enumerable.Empty<FredSeries>())
+            nodes.Add(new Node(s, categoryID) );
+
+        return nodes.Skip(skip).Take(take).ToList();
     }
 }

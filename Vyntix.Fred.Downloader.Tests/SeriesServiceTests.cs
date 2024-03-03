@@ -50,14 +50,7 @@ public class SeriesServiceTests: BaseTest
         Assert.That(s.HasVintages.Value, Is.False);
     }
 
-    [Test]
-    public async Task DownloadCategoriesForSeriesTest()
-    {
-        string symbol = "EXJPUS";
-        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadCategoriesForSeries(symbol));
-        Assert.IsTrue(result.Success);
-        Assert.That(db.SeriesCategories.Count(x => x.Symbol == symbol), Is.EqualTo(2));
-    }
+   
 
     [Test]
     public async Task DownloadSeriesReleaseTest()
@@ -88,7 +81,7 @@ public class SeriesServiceTests: BaseTest
         RowOpResult seriesResult = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol));
         RowOpResult obsResult = await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
         RowOpResult tagsResult = await client.CallAsync(x => x.SeriesService.DownloadSeriesTags(symbol));
-        RowOpResult catResult = await client.CallAsync(x => x.SeriesService.DownloadCategoriesForSeries(symbol));
+        RowOpResult catResult = await client.CallAsync(x => x.CategoriesService.DownloadCategoriesForSeries(symbol));
 
         // Make sure data was saved
         Assert.AreNotEqual(0, db.Series.Count(x => x.Symbol == symbol));
