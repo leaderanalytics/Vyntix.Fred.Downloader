@@ -44,12 +44,14 @@ public class AdaptiveClientModule : IAdaptiveClientModule
             .RegisterService<ObservationsService, IObservationsService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MSSQL)
             .RegisterService<ReleasesService, IReleasesService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MSSQL)
             .RegisterService<SeriesService, ISeriesService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MSSQL)
+            .RegisterService<DownloadService, IDownloadService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MSSQL)
 
 
             // Services - MySQL
             .RegisterService<CategoriesService, ICategoriesService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MySQL)
             .RegisterService<ObservationsService, IObservationsService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MySQL)
             .RegisterService<ReleasesService, IReleasesService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MySQL)
-            .RegisterService<SeriesService, ISeriesService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MySQL);
+            .RegisterService<SeriesService, ISeriesService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MySQL)
+            .RegisterService<DownloadService, IDownloadService>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MySQL);
     }
 }

@@ -29,14 +29,17 @@ public class DownloadService : BaseService, IDownloadService
     {
         APIResult result = new();
 
+        if(symbols.Count() == 1 && symbols.First() == "*") // Update all symbols in local db
+            symbols = (await serviceManifest.SeriesService.GetLocalSeries()).Select(x => x.Symbol).ToArray();
+
+
         // It does not make sense to download any object further down the hierarchy if
         // series does not exist.  Always download series.
         await serviceManifest.SeriesService.DownloadSeries(symbols);
         await DownloadSymbolBasedObjects(symbols);
 
-        if (args.ChildCategories || args.RelatedCategories || args.CategoryTags)
+        if (args.SeriesCategories)
         {
-        
             foreach (string symbol in symbols)
             {
                 await serviceManifest.CategoriesService.DownloadCategoriesForSeries(symbol);
@@ -88,6 +91,14 @@ public class DownloadService : BaseService, IDownloadService
                 await serviceManifest.CategoriesService.DownloadCategoryTags(categoryID);
 
         await db.SaveChangesAsync();
+
+        if (args.Recurse && args.ChildCategories)
+        {
+            List<FredCategory> childCategories = await serviceManifest.CategoriesService.GetLocalChildCategories(categoryID);
+            
+            foreach (FredCategory childCategory in childCategories)
+                await DownloadCategoryPath(childCategory.NativeID);
+        }
         result.Success = true;
         return result;
     }
