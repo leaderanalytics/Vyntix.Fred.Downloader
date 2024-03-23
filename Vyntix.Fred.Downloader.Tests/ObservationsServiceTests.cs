@@ -43,7 +43,7 @@ public class ObservationsServiceTests : BaseTest
     }
 
 
-    //[Test]
+    [Test]
     public async Task CrashEFWithChangeTrackingError()
     {
         // https://learn.microsoft.com/en-us/ef/core/change-tracking/explicit-tracking#introduction:
@@ -64,8 +64,11 @@ public class ObservationsServiceTests : BaseTest
         await db.SaveChangesAsync();                                                                        // SaveSeries
 
         FredSeries s2 = await db.Series.FirstOrDefaultAsync(x => x.Symbol == "xyz");                       // DownloadSeriesIfItDoesNotExist reads back a new instance
-
+        //FredSeries s2 = await db.Series.FindAsync(s.ID);                                                   // Does NOT crash when FindAsync is used.
+        
         s2.HasVintages = true;                                                                             // DownloadObservations modifies HasVintages of second instance
+
+        
         db.Entry(s2).State = EntityState.Modified;                                                         // Crash 
         await db.SaveChangesAsync();
     }

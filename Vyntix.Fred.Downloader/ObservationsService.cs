@@ -6,7 +6,14 @@ public class ObservationsService : BaseService, IObservationsService
     private IEndPointConfiguration currentEndpoint;
     private ResolutionHelper resolutionHelper;
 
-    public ObservationsService(FREDStagingDb db, IAPI_Manifest downloaderServices, IFredClient fredClient, IAdaptiveClient<IAPI_Manifest> serviceClient, ResolutionHelper resolutionHelper) : base(db, downloaderServices, fredClient)
+    public ObservationsService(
+        FREDStagingDb db, 
+        IAPI_Manifest downloaderServices, 
+        IFredClient fredClient, 
+        IAdaptiveClient<IAPI_Manifest> serviceClient, 
+        ResolutionHelper resolutionHelper, 
+        ILogger<ObservationsService> logger
+    ) : base(db, downloaderServices, fredClient, logger)
     {
         currentEndpoint = serviceClient.CurrentEndPoint ?? throw new NullReferenceException("CurrentEndPoint is null");
         this.resolutionHelper = resolutionHelper ?? throw new ArgumentNullException(nameof(resolutionHelper));
@@ -14,6 +21,7 @@ public class ObservationsService : BaseService, IObservationsService
 
     public async Task<List<RowOpResult>> DownloadObservations(string[] symbols)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(DownloadObservations), symbols);
         ArgumentNullException.ThrowIfNull(symbols);
 
         List<RowOpResult> result = new List<RowOpResult>();
@@ -21,11 +29,13 @@ public class ObservationsService : BaseService, IObservationsService
         foreach(string symbol in symbols)
             result.Add(await DownloadObservations(symbol));
 
+        logger.LogDebug("{m} complete.", nameof(DownloadObservations));
         return result;
     }
 
     public async Task<RowOpResult> DownloadObservations(string symbol)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadObservations), symbol);
         RowOpResult result = new();
         RowOpResult<FredSeries> seriesResult = await serviceManifest.SeriesService.DownloadSeriesIfItDoesNotExist(symbol);
 
@@ -74,31 +84,37 @@ public class ObservationsService : BaseService, IObservationsService
         }
         
         result.Success = true;
+        logger.LogDebug("{m} complete.", nameof(DownloadObservations));
         return result;
     }
 
     public async Task<RowOpResult> DeleteObservationsForSymbol(string symbol)
     {
+        logger.LogInformation("Starting {m}. Parameters are {p1}", nameof(DeleteObservationsForSymbol), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         RowOpResult result = new();
         await db.Observations.Where(x => x.Symbol == symbol).ExecuteDeleteAsync();
         result.Success = true;
+        logger.LogInformation("{m} complete.", nameof(DeleteObservationsForSymbol));
         return result;
     }
 
 
     public async Task<RowOpResult<List<FredObservation>>> GetLocalObservations(string[] symbols)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(GetLocalObservations), symbols);
         ArgumentNullException.ThrowIfNull(symbols);
         RowOpResult<List<FredObservation>> result = new();
         string allSymbols = string.Join(',', symbols);
         result.Item = await db.Observations.Where(x => EF.Functions.Like(x.Symbol, $"%{allSymbols}%")).OrderBy(x => x.Symbol).ThenBy(x => x.ObsDate).ThenBy(x => x.VintageDate).ToListAsync();
         result.Success = true;
+        logger.LogDebug("{m} complete.", nameof(GetLocalObservations));
         return result;
     }
 
     public async Task<RowOpResult<SeriesStatistics>> GetSeriesStatistics(string symbol)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(GetSeriesStatistics), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         RowOpResult<SeriesStatistics> result = new RowOpResult<SeriesStatistics> { Item = new SeriesStatistics()};
         
@@ -136,6 +152,7 @@ public class ObservationsService : BaseService, IObservationsService
         result.Item.MinValue = minValueTask.Result;
         result.Item.MaxValue = maxValueTask.Result;
         result.Success = true;
+        logger.LogDebug("{m} complete.", nameof(GetSeriesStatistics));
         return result;
     }
 }

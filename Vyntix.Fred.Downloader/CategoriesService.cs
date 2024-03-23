@@ -3,13 +3,14 @@ namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public class CategoriesService : BaseService, ICategoriesService
 {
-    public CategoriesService(FREDStagingDb db, IAPI_Manifest downloaderServices, IFredClient fredClient) : base(db, downloaderServices, fredClient)
+    public CategoriesService(FREDStagingDb db, IAPI_Manifest downloaderServices, IFredClient fredClient, ILogger<CategoriesService> logger) : base(db, downloaderServices, fredClient, logger)
     {
 
     }
 
     public async Task<RowOpResult> DownloadCategory(string categoryID)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategory), categoryID);
         ArgumentException.ThrowIfNullOrEmpty(categoryID);   
         RowOpResult result = new RowOpResult();
         FredCategory category = await fredClient.GetCategory(categoryID);
@@ -17,11 +18,14 @@ public class CategoriesService : BaseService, ICategoriesService
         if (category != null)
             result = await SaveCategory(category);
 
+        logger.LogDebug("{m} complete.", nameof(DownloadCategory));
         return result;
+        
     }
 
     public async Task<RowOpResult> DownloadCategoryChildren(string categoryID)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoryChildren), categoryID);
         ArgumentException.ThrowIfNullOrEmpty(categoryID);
         RowOpResult result = new RowOpResult();
         List<FredCategory> categories = await fredClient.GetCategoryChildren(categoryID);
@@ -34,11 +38,13 @@ public class CategoriesService : BaseService, ICategoriesService
             await db.SaveChangesAsync();
             result.Success = true;
         }
+        logger.LogDebug("{m} complete.", nameof(DownloadCategoryChildren));
         return result;
     }
 
     public async Task<RowOpResult> DownloadRelatedCategories(string parentID)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadRelatedCategories), parentID);
         ArgumentException.ThrowIfNullOrEmpty(parentID);
         RowOpResult result = new RowOpResult();
         List<FredRelatedCategory> relatedCategories = await fredClient.GetRelatedCategories(parentID);
@@ -51,11 +57,14 @@ public class CategoriesService : BaseService, ICategoriesService
             await db.SaveChangesAsync();
             result.Success = true;
         }
+
+        logger.LogDebug("{m} complete.", nameof(DownloadRelatedCategories));
         return result;
     }
 
     public async Task<RowOpResult> DownloadCategorySeries(string categoryID, bool includeDiscontinued = false)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(DownloadCategorySeries), categoryID, includeDiscontinued);
         ArgumentNullException.ThrowIfNull(categoryID);
         RowOpResult result = new RowOpResult();
         FredCategory? category = await db.Categories.FirstOrDefaultAsync(x => x.NativeID == categoryID);
@@ -81,11 +90,13 @@ public class CategoriesService : BaseService, ICategoriesService
             await db.SaveChangesAsync();
         }
         result.Success = true;
+        logger.LogDebug("{m} complete.", nameof(DownloadCategorySeries));
         return result;
     }
 
     public async Task<RowOpResult> DownloadCategoriesForSeries(string symbol)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoriesForSeries), symbol);
         ArgumentNullException.ThrowIfNullOrEmpty(symbol);
         RowOpResult seriesResult = await serviceManifest.SeriesService.DownloadSeriesIfItDoesNotExist(symbol);
 
@@ -106,11 +117,13 @@ public class CategoriesService : BaseService, ICategoriesService
             await db.SaveChangesAsync();
             result.Success = true;
         }
+        logger.LogDebug("{m} complete.", nameof(DownloadCategoriesForSeries));
         return result;
     }
 
     public async Task<RowOpResult> DownloadCategoryTags(string categoryID)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoryTags), categoryID);
         ArgumentException.ThrowIfNullOrEmpty(categoryID);
         RowOpResult result = new RowOpResult();
         List<FredCategoryTag> categoryTags = await fredClient.GetCategoryTags(categoryID);
@@ -123,11 +136,13 @@ public class CategoriesService : BaseService, ICategoriesService
             await db.SaveChangesAsync();
             result.Success = true;
         }
+        logger.LogDebug("{m} complete.", nameof(DownloadCategoryTags));
         return result;
     }
 
     public async Task<RowOpResult> SaveCategory(FredCategory category, bool saveChanges = true)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(SaveCategory), category, saveChanges);
         ArgumentNullException.ThrowIfNull(category);
         
         if (string.IsNullOrEmpty(category.NativeID))
@@ -157,11 +172,13 @@ public class CategoriesService : BaseService, ICategoriesService
 
             result.Success = true;
         }
+        logger.LogDebug("{m} complete.", nameof(SaveCategory));
         return result;
     }
 
     public async Task<RowOpResult> SaveCategoryTag(FredCategoryTag categoryTag, bool saveChanges = true)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveCategoryTag), categoryTag, saveChanges);
         ArgumentNullException.ThrowIfNull(categoryTag);
 
         if (string.IsNullOrEmpty(categoryTag.CategoryID))
@@ -185,11 +202,13 @@ public class CategoriesService : BaseService, ICategoriesService
 
             result.Success = true;
         }
+        logger.LogDebug("{m} complete.", nameof(SaveCategoryTag));
         return result;
     }
 
     public async Task<RowOpResult> SaveRelatedCategory(FredRelatedCategory category, bool saveChanges = true)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveRelatedCategory), category, saveChanges);
         ArgumentNullException.ThrowIfNull(category);
 
         if (string.IsNullOrEmpty(category.CategoryID))
@@ -211,12 +230,13 @@ public class CategoriesService : BaseService, ICategoriesService
             
             result.Success = true;
         }
-     
+        logger.LogDebug("{m} complete.", nameof(SaveRelatedCategory));
         return result;
     }
 
     public async Task<List<FredCategory>> GetLocalChildCategories(string? parentID, bool sortAscending = true, string searchExpression = null, int skip = 0, int take = int.MaxValue)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}, {p3}, {p4}, {p5}", nameof(GetLocalChildCategories), parentID, sortAscending, searchExpression, skip, take);
         return await db.Categories
             .Where(x => x.ParentID == parentID && (string.IsNullOrEmpty(searchExpression) || x.Name.Contains(searchExpression, StringComparison.InvariantCultureIgnoreCase)))
             .SortBy(x => x.Name, sortAscending)
@@ -226,11 +246,14 @@ public class CategoriesService : BaseService, ICategoriesService
 
     public async Task<List<FredCategory>> GetLocalCategoriesForSeries(string symbol)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(GetLocalCategoriesForSeries), symbol);
+
         var query = from sc in db.SeriesCategories 
                     join c in db.Categories on sc.CategoryID equals c.NativeID
                     where sc.Symbol == symbol
                     select c;
 
+        logger.LogDebug("{m} complete.", nameof(GetLocalCategoriesForSeries));
         return await query.ToListAsync();
     }
 
@@ -243,6 +266,8 @@ public class CategoriesService : BaseService, ICategoriesService
     /// <returns></returns>
     public async Task<List<Node>> GetCategoryNodes(string? categoryID, bool sortAscending = true, string searchExpression = null, int skip = 0, int take = int.MaxValue)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}, {p3}, {p4}, {p5}", nameof(GetCategoryNodes), categoryID, sortAscending, searchExpression, skip, take);
+
         List<Node> nodes = new();
         List<FredCategory> categories = await GetLocalChildCategories(categoryID, sortAscending, searchExpression);
         List<FredSeries> series = await serviceManifest.SeriesService.GetLocalSeriesForCategory(null, searchExpression, categoryID, nameof(FredSeries.Title), sortAscending);
@@ -253,6 +278,7 @@ public class CategoriesService : BaseService, ICategoriesService
         foreach (FredSeries s in series ?? Enumerable.Empty<FredSeries>())
             nodes.Add(new Node(s, categoryID) );
 
+        logger.LogDebug("{m} complete.", nameof(GetCategoryNodes));
         return nodes.Skip(skip).Take(take).ToList();
     }
 }

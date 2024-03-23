@@ -11,3 +11,4 @@ global using LeaderAnalytics.Vyntix.Fred.Model;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Design;
 global using System.Reflection;
+global using Microsoft.Extensions.Logging;

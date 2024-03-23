@@ -1,18 +1,20 @@
-﻿
-namespace LeaderAnalytics.Vyntix.Fred.Downloader;
-
+﻿namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public class DownloadService : BaseService, IDownloadService
 {
     private FredDownloadArgs args;
 
-    public DownloadService(FREDStagingDb db, IAPI_Manifest serviceManifest, IFredClient fredClient) : base(db, serviceManifest, fredClient)
-    {
 
+    public DownloadService(FREDStagingDb db, IAPI_Manifest serviceManifest, IFredClient fredClient, ILogger<DownloadService> logger) : base(db, serviceManifest, fredClient, logger)
+    { 
+    
     }
+    
 
     public async Task<APIResult> Download(FredDownloadArgs args)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(DownloadService.Download), args);
+
         ArgumentNullException.ThrowIfNull(args);
         this.args = args;
 
@@ -27,6 +29,8 @@ public class DownloadService : BaseService, IDownloadService
 
     private async Task<APIResult> DownloadSymbolPath(string[] symbols)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(DownloadService.DownloadSymbolPath), symbols);
+        
         APIResult result = new();
 
         if(symbols.Count() == 1 && symbols.First() == "*") // Update all symbols in local db
@@ -61,12 +65,14 @@ public class DownloadService : BaseService, IDownloadService
 
         await db.SaveChangesAsync();
         result.Success = true;
+        logger.LogDebug("{m} complete.", nameof(DownloadService.DownloadSymbolPath));
         return result;
     }
 
 
     private async Task<APIResult> DownloadCategoryPath(string categoryID)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadService.DownloadCategoryPath), categoryID);
         APIResult result = new();
 
         if (args.Series || args.SeriesTags || args.Releases || args.ReleaseDates || args.Sources || args.Observations)
@@ -100,12 +106,14 @@ public class DownloadService : BaseService, IDownloadService
                 await DownloadCategoryPath(childCategory.NativeID);
         }
         result.Success = true;
+        logger.LogDebug("{m} complete.", nameof(DownloadService.DownloadCategoryPath));
         return result;
     }
 
 
     private async Task DownloadSymbolBasedObjects(string[] symbols)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(DownloadService.DownloadSymbolBasedObjects), symbols);
         // If called by DownloadSymbolPath, symbols are an arbitrary list input by the user.
         // If called by DownloadCategoryPath, symbols are all series within a category.
 
@@ -137,5 +145,6 @@ public class DownloadService : BaseService, IDownloadService
                 }
             }
         }
+        logger.LogDebug("{m} complete.", nameof(DownloadService.DownloadSymbolBasedObjects));
     }
 }

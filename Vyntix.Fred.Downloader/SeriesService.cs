@@ -1,17 +1,15 @@
-﻿using LeaderAnalytics.Vyntix.Fred.Model;
-using System.Runtime.InteropServices;
-
-namespace LeaderAnalytics.Vyntix.Fred.Downloader;
+﻿namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public class SeriesService : BaseService, ISeriesService
 {
-    public SeriesService(FREDStagingDb db, IAPI_Manifest serviceManifest,  IFredClient fredClient) : base(db, serviceManifest, fredClient)
+    public SeriesService(FREDStagingDb db, IAPI_Manifest serviceManifest,  IFredClient fredClient, ILogger<SeriesService> logger) : base(db, serviceManifest, fredClient, logger)
     {
 
     }
 
     public async Task<List<RowOpResult>> DownloadSeries(string[] symbols, string? releaseID = null)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(DownloadSeries), symbols, releaseID);
         ArgumentNullException.ThrowIfNull(symbols);
         List<RowOpResult> results = new();
 
@@ -24,13 +22,14 @@ public class SeriesService : BaseService, ISeriesService
 
             results.Add(result);
         }
-
+        logger.LogDebug("{m} complete.", nameof(DownloadSeries));
         return results;
     }
 
 
     public async Task<RowOpResult> DownloadSeries(string symbol, string? releaseID = null)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(DownloadSeries), symbol, releaseID);
         ArgumentNullException.ThrowIfNullOrEmpty(symbol);
         FredSeries series = await fredClient.GetSeries(symbol);
         RowOpResult result = new RowOpResult();
@@ -44,6 +43,7 @@ public class SeriesService : BaseService, ISeriesService
             result = await SaveSeries(series, true);
             db.Entry(series).State = EntityState.Detached; // Because in DownloadSeriesIfItDoesNotExist we get this entity again.  See ObservationsServiceTests.cs
         }
+        logger.LogDebug("{m} complete.", nameof(DownloadSeries));
         return result;
     }
 
@@ -51,6 +51,7 @@ public class SeriesService : BaseService, ISeriesService
 
     public async Task<RowOpResult> DownloadSeriesRelease(string symbol)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeriesRelease), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         RowOpResult result = new RowOpResult();
         FredRelease? release = await fredClient.GetReleaseForSeries(symbol);
@@ -61,7 +62,7 @@ public class SeriesService : BaseService, ISeriesService
             return result;
         }
 
-        FredSeries? series = db.Series.FirstOrDefault(x => x.Symbol == symbol);
+        FredSeries? series = (await DownloadSeriesIfItDoesNotExist(symbol)).Item;
 
         if (series is null)
         {
@@ -79,11 +80,13 @@ public class SeriesService : BaseService, ISeriesService
         // release might already exist in which case we will get a dupe error.  Ignore it.
         await serviceManifest.ReleasesService.SaveRelease(release, true);
         result.Success = true;
+        logger.LogDebug("{m} complete.", nameof(DownloadSeriesRelease));
         return result;
     }
 
     public async Task<RowOpResult> DownloadSeriesTags(string symbol)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeries), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         RowOpResult result = new();
         List<FredSeriesTag> seriesTags = await fredClient.GetSeriesTags(symbol);
@@ -96,35 +99,46 @@ public class SeriesService : BaseService, ISeriesService
             await db.SaveChangesAsync();
             result.Success = true;
         }
+        logger.LogDebug("{m} complete.", nameof(DownloadSeriesTags));
         return result;
     }
 
     public async Task<RowOpResult> DeleteSeriesTagsForSymbol(string symbol)
     {
+        logger.LogInformation("Starting {m}. Parameters are {p1}", nameof(DeleteSeriesTagsForSymbol), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         RowOpResult result = new();
         await db.SeriesTags.Where(x => x.Symbol == symbol).ExecuteDeleteAsync();
         result.Success = true;
+        logger.LogInformation("{m} complete.", nameof(DeleteSeriesCategoriesForSymbol));
         return result;
     }
 
     public async Task<RowOpResult<FredSeries>> DownloadSeriesIfItDoesNotExist(string symbol)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeriesIfItDoesNotExist), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         RowOpResult<FredSeries> result = new();
-        result.Item = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
+        
+        int? id = (await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol))?.ID;
+        
+        if (id.HasValue)
+            result.Item = await db.Series.FindAsync(id);
 
         if (result.Item is null)
         {
             await DownloadSeries(symbol);
-            result.Item = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol); // Needs to be detached
+            id = (await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol))?.ID;
+            result.Item = await db.Series.FindAsync(id);
         }
         result.Success = result.Item is not null;
+        logger.LogDebug("{m} complete.", nameof(DownloadSeriesIfItDoesNotExist));
         return result;
     }
 
     public async Task<RowOpResult> SaveSeries(FredSeries series, bool saveChanges = true)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSeries), series, saveChanges);
         ArgumentNullException.ThrowIfNull(series);
         RowOpResult result = new RowOpResult();
         
@@ -144,11 +158,13 @@ public class SeriesService : BaseService, ISeriesService
 
             result.Success = true;
         }
+        logger.LogDebug("{m} complete.", nameof(SaveSeries));
         return result;
     }
 
     public async Task<RowOpResult> SaveSeriesCategory(FredSeriesCategory seriesCategory, bool saveChanges = true)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSeriesCategory), seriesCategory, saveChanges);
         ArgumentNullException.ThrowIfNull(seriesCategory);
         RowOpResult result = new RowOpResult();
 
@@ -170,21 +186,24 @@ public class SeriesService : BaseService, ISeriesService
             
             result.Success = true;
         }
-        
+        logger.LogDebug("{m} complete.", nameof(SaveSeriesCategory));
         return result;
     }
 
     public async Task<RowOpResult> DeleteSeriesCategoriesForSymbol(string symbol)
     {
+        logger.LogInformation("Starting {m}. Parameters are {p1}", nameof(DeleteSeriesCategoriesForSymbol), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         RowOpResult result = new();
         await db.SeriesCategories.Where(x => x.Symbol == symbol).ExecuteDeleteAsync();
         result.Success = true;
+        logger.LogInformation("{m} complete.", nameof(DeleteSeriesCategoriesForSymbol));
         return result;
     }
 
     public async Task<RowOpResult> SaveSeriesTag(FredSeriesTag seriesTag, bool saveChanges = true)
     {
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSeriesTag), seriesTag, saveChanges);
         ArgumentNullException.ThrowIfNull(seriesTag);
 
         if (string.IsNullOrEmpty(seriesTag.Symbol))
@@ -208,11 +227,14 @@ public class SeriesService : BaseService, ISeriesService
 
             result.Success = true;
         }
+        logger.LogDebug("{m} complete.", nameof(SaveSeriesTag));
         return result;
     }
 
     public async Task<List<FredSeries>> GetLocalSeries(string? searchSymbol = null, string? searchTitle = null, string? sortExpression = null, bool sortAscending = true, int skip = 0, int take = int.MaxValue)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}, {p3}, {p4}, {p5}, {p6}", nameof(GetLocalSeries), searchSymbol, searchTitle, sortExpression, sortAscending, skip, take);
+
         var query = db.Series
             .Where(x => (string.IsNullOrEmpty(searchTitle) || x.Title.Contains(searchTitle)) && (string.IsNullOrEmpty(searchSymbol) || x.Symbol.Contains(searchSymbol)));
 
@@ -226,11 +248,14 @@ public class SeriesService : BaseService, ISeriesService
         };
 
         List<FredSeries> result = await query.Skip(skip).Take(take).ToListAsync();
+        logger.LogDebug("{m} complete.", nameof(GetLocalSeries));
         return result;
     }
 
     public async Task<List<FredSeries>> GetLocalSeriesForCategory(string? symbol = null, string? titleSearchExpression = null,  string? categoryID = null, string? sortExpression = null,  bool sortAscending = true,  int skip = 0, int take = int.MaxValue)
     {
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}, {p3}, {p4}, {p5}, {p6}", nameof(GetLocalSeriesForCategory), titleSearchExpression, categoryID, sortExpression, sortAscending, skip, take);
+
         var query = from sc in db.SeriesCategories
                     join s in db.Series on sc.Symbol equals s.Symbol
                     join c in db.Categories on sc.CategoryID equals c.NativeID
@@ -247,14 +272,17 @@ public class SeriesService : BaseService, ISeriesService
             _ => query.SortBy(x => x.Title, sortAscending)
         };
         query = query.Skip(skip).Take(take);
-
-        return await query.ToListAsync();
+        List<FredSeries> result = await query.ToListAsync();
+        logger.LogDebug("{m} complete.", nameof(GetLocalSeriesForCategory));
+        return result;
     }
 
     public async Task<int> GetSeriesCount() => await db.Series.CountAsync();
 
     public async Task<RowOpResult> DeleteSeries(string symbol)
     {
+        logger.LogInformation("Starting {m}. Parameters are {p1}", nameof(DeleteSeries), symbol); // Always log
+
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         RowOpResult result = new();
         await DeleteSeriesCategoriesForSymbol(symbol);
@@ -262,6 +290,9 @@ public class SeriesService : BaseService, ISeriesService
         await serviceManifest.ObservationsService.DeleteObservationsForSymbol(symbol);
         await db.Series.Where(x => x.Symbol == symbol).ExecuteDeleteAsync();
         result.Success = true;
+
+        logger.LogInformation("{m} complete.", nameof(DeleteSeries));
+        
         return result;
     }
 }
