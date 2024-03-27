@@ -244,6 +244,7 @@ public class SeriesService : BaseService, ISeriesService
             nameof(FredSeries.Frequency) => query.SortBy(x => x.Frequency, sortAscending),
             nameof(FredSeries.Units) => query.SortBy(x => x.Units, sortAscending),
             nameof(FredSeries.SeasonalAdj) => query.SortBy(x => x.SeasonalAdj, sortAscending),
+            nameof(FredSeries.LastObsCheck) => query.SortBy(x => x.LastObsCheck, sortAscending),
             _ => query.SortBy(x => x.Symbol, sortAscending)
         };
 
