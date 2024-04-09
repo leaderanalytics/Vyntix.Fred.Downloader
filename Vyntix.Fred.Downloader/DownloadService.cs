@@ -4,17 +4,15 @@ public class DownloadService : BaseService, IDownloadService
 {
     private FredDownloadArgs args;
 
-
-    public DownloadService(FREDStagingDb db, IAPI_Manifest serviceManifest, IFredClient fredClient, ILogger<DownloadService> logger) : base(db, serviceManifest, fredClient, logger)
+    public DownloadService(FREDStagingDb db, IAPI_Manifest serviceManifest, IFredClient fredClient, ILogger<DownloadService> logger, Action<string> statusCallback) : base(db, serviceManifest, fredClient, logger, statusCallback)
     { 
-    
+        
     }
-    
 
-    public async Task<APIResult> Download(FredDownloadArgs args)
+    public async Task<APIResult> Download(FredDownloadArgs args, Action<string> statusCallback)
     {
         logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(DownloadService.Download), args);
-
+        this.statusCallback = statusCallback;
         ArgumentNullException.ThrowIfNull(args);
         this.args = args;
 
@@ -30,7 +28,7 @@ public class DownloadService : BaseService, IDownloadService
     private async Task<APIResult> DownloadSymbolPath(string[] symbols)
     {
         logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(DownloadService.DownloadSymbolPath), symbols);
-        
+           
         APIResult result = new();
 
         if(symbols.Count() == 1 && symbols.First() == "*") // Update all symbols in local db
@@ -39,7 +37,9 @@ public class DownloadService : BaseService, IDownloadService
 
         // It does not make sense to download any object further down the hierarchy if
         // series does not exist.  Always download series.
+        
         await serviceManifest.SeriesService.DownloadSeries(symbols);
+
         await DownloadSymbolBasedObjects(symbols);
 
         if (args.SeriesCategories)

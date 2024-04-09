@@ -4,7 +4,7 @@ namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public class ReleasesService : BaseService, IReleasesService
 {
-    public ReleasesService(FREDStagingDb db, IAPI_Manifest serviceManifest, IFredClient fredClient, ILogger<ReleasesService> logger) : base(db, serviceManifest, fredClient, logger)
+    public ReleasesService(FREDStagingDb db, IAPI_Manifest serviceManifest, IFredClient fredClient, ILogger<ReleasesService> logger, Action<string> statusCallback) : base(db, serviceManifest, fredClient, logger, statusCallback)
     {
 
     }
@@ -55,8 +55,9 @@ public class ReleasesService : BaseService, IReleasesService
 
     public async Task<RowOpResult> DownloadRelease(string releaseID)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadRelease), releaseID);
         ArgumentException.ThrowIfNullOrEmpty(releaseID);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadRelease), releaseID);
+        Status($"Downloading release for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
         FredRelease? release = await fredClient.GetRelease(releaseID);
 
@@ -69,8 +70,9 @@ public class ReleasesService : BaseService, IReleasesService
 
     public async Task<RowOpResult> DownloadReleaseDates(string releaseID)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseDates), releaseID);
         ArgumentNullException.ThrowIfNullOrEmpty(releaseID);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseDates), releaseID);
+        Status($"Downloading release dates for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
         await DownloadReleaseIfItDoesNotExist(releaseID);
         DateTime? maxDate = db.ReleaseDates.Where(x => x.ReleaseID == releaseID).Max(x => x == null ? null as DateTime? : x.DateReleased);
@@ -90,8 +92,9 @@ public class ReleasesService : BaseService, IReleasesService
 
     public async Task<RowOpResult> DownloadReleaseSeries(string releaseID)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseSeries), releaseID);
         ArgumentNullException.ThrowIfNullOrEmpty(releaseID);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseSeries), releaseID);
+        Status($"Downloading series for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
         await DownloadReleaseIfItDoesNotExist(releaseID);
         List<FredSeries> seriess = await fredClient.GetSeriesForRelease(releaseID);
@@ -119,8 +122,9 @@ public class ReleasesService : BaseService, IReleasesService
 
     public async Task<RowOpResult> DownloadReleaseForSeries(string symbol, bool saveChanges = true)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}, {p1}", nameof(DownloadReleaseForSeries), symbol, saveChanges);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p1}", nameof(DownloadReleaseForSeries), symbol, saveChanges);
+        Status($"Downloading release for symbol {symbol}");
         FredRelease release = await fredClient.GetReleaseForSeries(symbol);
         logger.LogDebug("{m} complete.", nameof(DownloadReleaseForSeries));
         return await SaveRelease(release, saveChanges);
@@ -128,8 +132,9 @@ public class ReleasesService : BaseService, IReleasesService
 
     public async Task<RowOpResult> DownloadReleaseSources(string releaseID)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseSources), releaseID);
         ArgumentException.ThrowIfNullOrEmpty(releaseID);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseSources), releaseID);
+        Status($"Downloading release sources for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
         await DownloadReleaseIfItDoesNotExist(releaseID);
         List<FredSource> sources = await fredClient.GetSourcesForRelease(releaseID);
@@ -148,8 +153,9 @@ public class ReleasesService : BaseService, IReleasesService
 
     public async Task<RowOpResult> DownloadSourceReleases(string sourceID)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSourceReleases), sourceID);
         ArgumentException.ThrowIfNullOrEmpty(sourceID);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSourceReleases), sourceID);
+        Status($"Downloading releases for sourceID {sourceID}");
         RowOpResult result = new RowOpResult();
         await DownloadSourceIfItDoesNotExist(sourceID);
         List<FredRelease> releases = await fredClient.GetReleasesForSource(sourceID);
@@ -186,8 +192,9 @@ public class ReleasesService : BaseService, IReleasesService
 
     public async Task<RowOpResult> DownloadSource(string sourceID)
     {
+        ArgumentException.ThrowIfNullOrEmpty(sourceID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSource), sourceID);
-        ArgumentException.ThrowIfNullOrEmpty(sourceID); 
+        Status($"Downloading source for sourceID {sourceID}");
         RowOpResult result = new RowOpResult();
         FredSource? source = await fredClient.GetSource(sourceID);
 
@@ -202,8 +209,8 @@ public class ReleasesService : BaseService, IReleasesService
 
     public async Task<RowOpResult> SaveRelease(FredRelease release, bool saveChanges = true)
     {
-        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveRelease), release, saveChanges);
         ArgumentNullException.ThrowIfNull(release);
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveRelease), release, saveChanges);
 
         if (string.IsNullOrEmpty(release.NativeID))
             throw new Exception($"{nameof(release.NativeID)} is required.");
@@ -248,8 +255,9 @@ public class ReleasesService : BaseService, IReleasesService
 
     public async Task<RowOpResult> SaveReleaseDate(FredReleaseDate releaseDate, bool saveChanges = true)
     {
-        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveReleaseDate), releaseDate, saveChanges);
         ArgumentNullException.ThrowIfNull(releaseDate);
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveReleaseDate), releaseDate, saveChanges);
+        
 
         if (string.IsNullOrEmpty(releaseDate.ReleaseID))
             throw new Exception($"{nameof(releaseDate.ReleaseID)} is required.");
@@ -274,8 +282,8 @@ public class ReleasesService : BaseService, IReleasesService
 
     public async Task<RowOpResult> SaveSource(FredSource source, bool saveChanges = true)
     {
-        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSource), source, saveChanges);
         ArgumentNullException.ThrowIfNull(source);
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSource), source, saveChanges);
 
         if (string.IsNullOrEmpty(source.NativeID))
             throw new Exception($"{nameof(source.NativeID)} is required.");

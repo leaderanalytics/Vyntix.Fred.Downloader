@@ -2,15 +2,16 @@
 
 public class SeriesService : BaseService, ISeriesService
 {
-    public SeriesService(FREDStagingDb db, IAPI_Manifest serviceManifest,  IFredClient fredClient, ILogger<SeriesService> logger) : base(db, serviceManifest, fredClient, logger)
+    public SeriesService(FREDStagingDb db, IAPI_Manifest serviceManifest, IFredClient fredClient, ILogger<SeriesService> logger, Action<string> statusCallback) : base(db, serviceManifest, fredClient, logger, statusCallback)
     {
 
     }
 
     public async Task<List<RowOpResult>> DownloadSeries(string[] symbols, string? releaseID = null)
     {
-        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(DownloadSeries), symbols, releaseID);
         ArgumentNullException.ThrowIfNull(symbols);
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(DownloadSeries), symbols, releaseID);
+        
         List<RowOpResult> results = new();
 
         foreach (string symbol in symbols)
@@ -29,8 +30,9 @@ public class SeriesService : BaseService, ISeriesService
 
     public async Task<RowOpResult> DownloadSeries(string symbol, string? releaseID = null)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(DownloadSeries), symbol, releaseID);
         ArgumentNullException.ThrowIfNullOrEmpty(symbol);
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(DownloadSeries), symbol, releaseID);
+        Status($"Downloading series for symbol {symbol}");
         FredSeries series = await fredClient.GetSeries(symbol);
         RowOpResult result = new RowOpResult();
 
@@ -51,8 +53,9 @@ public class SeriesService : BaseService, ISeriesService
 
     public async Task<RowOpResult> DownloadSeriesRelease(string symbol)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeriesRelease), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeriesRelease), symbol);
+        Status($"Downloading release for series symbol {symbol}");
         RowOpResult result = new RowOpResult();
         FredRelease? release = await fredClient.GetReleaseForSeries(symbol);
         
@@ -86,8 +89,9 @@ public class SeriesService : BaseService, ISeriesService
 
     public async Task<RowOpResult> DownloadSeriesTags(string symbol)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeries), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeries), symbol);
+        Status($"Downloading tags for series symbol {symbol}");
         RowOpResult result = new();
         List<FredSeriesTag> seriesTags = await fredClient.GetSeriesTags(symbol);
 
@@ -105,8 +109,9 @@ public class SeriesService : BaseService, ISeriesService
 
     public async Task<RowOpResult> DeleteSeriesTagsForSymbol(string symbol)
     {
-        logger.LogInformation("Starting {m}. Parameters are {p1}", nameof(DeleteSeriesTagsForSymbol), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
+        logger.LogInformation("Starting {m}. Parameters are {p1}", nameof(DeleteSeriesTagsForSymbol), symbol);
+        Status($"Deleting series tags for symbol {symbol}");
         RowOpResult result = new();
         await db.SeriesTags.Where(x => x.Symbol == symbol).ExecuteDeleteAsync();
         result.Success = true;
@@ -116,10 +121,9 @@ public class SeriesService : BaseService, ISeriesService
 
     public async Task<RowOpResult<FredSeries>> DownloadSeriesIfItDoesNotExist(string symbol)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeriesIfItDoesNotExist), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeriesIfItDoesNotExist), symbol);
         RowOpResult<FredSeries> result = new();
-        
         int? id = (await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol))?.ID;
         
         if (id.HasValue)
@@ -138,8 +142,8 @@ public class SeriesService : BaseService, ISeriesService
 
     public async Task<RowOpResult> SaveSeries(FredSeries series, bool saveChanges = true)
     {
-        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSeries), series, saveChanges);
         ArgumentNullException.ThrowIfNull(series);
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSeries), series, saveChanges);
         RowOpResult result = new RowOpResult();
         
         if(string.IsNullOrEmpty(series.Symbol))
@@ -164,8 +168,8 @@ public class SeriesService : BaseService, ISeriesService
 
     public async Task<RowOpResult> SaveSeriesCategory(FredSeriesCategory seriesCategory, bool saveChanges = true)
     {
-        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSeriesCategory), seriesCategory, saveChanges);
         ArgumentNullException.ThrowIfNull(seriesCategory);
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSeriesCategory), seriesCategory, saveChanges);
         RowOpResult result = new RowOpResult();
 
         if (String.IsNullOrEmpty(seriesCategory.CategoryID))
@@ -192,8 +196,8 @@ public class SeriesService : BaseService, ISeriesService
 
     public async Task<RowOpResult> DeleteSeriesCategoriesForSymbol(string symbol)
     {
-        logger.LogInformation("Starting {m}. Parameters are {p1}", nameof(DeleteSeriesCategoriesForSymbol), symbol);
         ArgumentException.ThrowIfNullOrEmpty(symbol);
+        logger.LogInformation("Starting {m}. Parameters are {p1}", nameof(DeleteSeriesCategoriesForSymbol), symbol);
         RowOpResult result = new();
         await db.SeriesCategories.Where(x => x.Symbol == symbol).ExecuteDeleteAsync();
         result.Success = true;
@@ -203,8 +207,8 @@ public class SeriesService : BaseService, ISeriesService
 
     public async Task<RowOpResult> SaveSeriesTag(FredSeriesTag seriesTag, bool saveChanges = true)
     {
-        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSeriesTag), seriesTag, saveChanges);
         ArgumentNullException.ThrowIfNull(seriesTag);
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveSeriesTag), seriesTag, saveChanges);
 
         if (string.IsNullOrEmpty(seriesTag.Symbol))
             throw new Exception($"{nameof(seriesTag.Symbol)} is required.");

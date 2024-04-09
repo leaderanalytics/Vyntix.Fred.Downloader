@@ -3,15 +3,16 @@ namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public class CategoriesService : BaseService, ICategoriesService
 {
-    public CategoriesService(FREDStagingDb db, IAPI_Manifest downloaderServices, IFredClient fredClient, ILogger<CategoriesService> logger) : base(db, downloaderServices, fredClient, logger)
+    public CategoriesService(FREDStagingDb db, IAPI_Manifest downloaderServices, IFredClient fredClient, ILogger<CategoriesService> logger, Action<string> statusCallback) : base(db, downloaderServices, fredClient, logger, statusCallback)
     {
 
     }
 
     public async Task<RowOpResult> DownloadCategory(string categoryID)
     {
+        ArgumentException.ThrowIfNullOrEmpty(categoryID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategory), categoryID);
-        ArgumentException.ThrowIfNullOrEmpty(categoryID);   
+        Status($"Downloading Category {categoryID}.");
         RowOpResult result = new RowOpResult();
         FredCategory category = await fredClient.GetCategory(categoryID);
         
@@ -25,8 +26,9 @@ public class CategoriesService : BaseService, ICategoriesService
 
     public async Task<RowOpResult> DownloadCategoryChildren(string categoryID)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoryChildren), categoryID);
         ArgumentException.ThrowIfNullOrEmpty(categoryID);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoryChildren), categoryID);
+        Status($"Downloading child categories for categoryID {categoryID}");
         RowOpResult result = new RowOpResult();
         List<FredCategory> categories = await fredClient.GetCategoryChildren(categoryID);
 
@@ -44,8 +46,9 @@ public class CategoriesService : BaseService, ICategoriesService
 
     public async Task<RowOpResult> DownloadRelatedCategories(string parentID)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadRelatedCategories), parentID);
         ArgumentException.ThrowIfNullOrEmpty(parentID);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadRelatedCategories), parentID);
+        Status($"Downloading related categories for categoryID {parentID}");
         RowOpResult result = new RowOpResult();
         List<FredRelatedCategory> relatedCategories = await fredClient.GetRelatedCategories(parentID);
 
@@ -64,8 +67,9 @@ public class CategoriesService : BaseService, ICategoriesService
 
     public async Task<RowOpResult> DownloadCategorySeries(string categoryID, bool includeDiscontinued = false)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(DownloadCategorySeries), categoryID, includeDiscontinued);
         ArgumentNullException.ThrowIfNull(categoryID);
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(DownloadCategorySeries), categoryID, includeDiscontinued);
+        Status($"Downloading series for categoryID {categoryID}");
         RowOpResult result = new RowOpResult();
         FredCategory? category = await db.Categories.FirstOrDefaultAsync(x => x.NativeID == categoryID);
 
@@ -96,8 +100,9 @@ public class CategoriesService : BaseService, ICategoriesService
 
     public async Task<RowOpResult> DownloadCategoriesForSeries(string symbol)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoriesForSeries), symbol);
         ArgumentNullException.ThrowIfNullOrEmpty(symbol);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoriesForSeries), symbol);
+        Status($"Downloading categories for series {symbol}");
         RowOpResult seriesResult = await serviceManifest.SeriesService.DownloadSeriesIfItDoesNotExist(symbol);
 
         if (!seriesResult.Success)
@@ -123,8 +128,9 @@ public class CategoriesService : BaseService, ICategoriesService
 
     public async Task<RowOpResult> DownloadCategoryTags(string categoryID)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoryTags), categoryID);
         ArgumentException.ThrowIfNullOrEmpty(categoryID);
+        logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoryTags), categoryID);
+        Status($"Downloading tags for category {categoryID}");
         RowOpResult result = new RowOpResult();
         List<FredCategoryTag> categoryTags = await fredClient.GetCategoryTags(categoryID);
 
@@ -142,8 +148,8 @@ public class CategoriesService : BaseService, ICategoriesService
 
     public async Task<RowOpResult> SaveCategory(FredCategory category, bool saveChanges = true)
     {
-        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(SaveCategory), category, saveChanges);
         ArgumentNullException.ThrowIfNull(category);
+        logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(SaveCategory), category, saveChanges);
         
         if (string.IsNullOrEmpty(category.NativeID))
             throw new Exception($"{nameof(category.NativeID)} is required.");
@@ -178,8 +184,8 @@ public class CategoriesService : BaseService, ICategoriesService
 
     public async Task<RowOpResult> SaveCategoryTag(FredCategoryTag categoryTag, bool saveChanges = true)
     {
-        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveCategoryTag), categoryTag, saveChanges);
         ArgumentNullException.ThrowIfNull(categoryTag);
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveCategoryTag), categoryTag, saveChanges);
 
         if (string.IsNullOrEmpty(categoryTag.CategoryID))
             throw new Exception($"{nameof(categoryTag.CategoryID)} is required.");
@@ -208,8 +214,8 @@ public class CategoriesService : BaseService, ICategoriesService
 
     public async Task<RowOpResult> SaveRelatedCategory(FredRelatedCategory category, bool saveChanges = true)
     {
-        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveRelatedCategory), category, saveChanges);
         ArgumentNullException.ThrowIfNull(category);
+        logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(SaveRelatedCategory), category, saveChanges);
 
         if (string.IsNullOrEmpty(category.CategoryID))
             throw new Exception($"{nameof(category.CategoryID)}  is required.");
@@ -266,6 +272,7 @@ public class CategoriesService : BaseService, ICategoriesService
     /// <returns></returns>
     public async Task<List<Node>> GetCategoryNodes(string? categoryID, bool sortAscending = true, string searchExpression = null, int skip = 0, int take = int.MaxValue)
     {
+        ArgumentException.ThrowIfNullOrEmpty(categoryID);
         logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}, {p3}, {p4}, {p5}", nameof(GetCategoryNodes), categoryID, sortAscending, searchExpression, skip, take);
 
         List<Node> nodes = new();
