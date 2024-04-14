@@ -9,7 +9,7 @@ public class ReleasesService : BaseService, IReleasesService
 
     }
 
-    public async Task<RowOpResult> DownloadAllReleases()
+    public async Task<RowOpResult> DownloadAllReleases(CancellationToken? cancellationToken)
     {
         logger.LogDebug("Starting {m}.", nameof(DownloadAllReleases));
         RowOpResult result = new RowOpResult();
@@ -27,7 +27,7 @@ public class ReleasesService : BaseService, IReleasesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadAllReleaseDates()
+    public async Task<RowOpResult> DownloadAllReleaseDates(CancellationToken? cancellationToken)
     {
         logger.LogDebug("Starting {m}.", nameof(DownloadAllReleaseDates));
         RowOpResult result = new RowOpResult();
@@ -38,7 +38,7 @@ public class ReleasesService : BaseService, IReleasesService
         {
             foreach (var grp in dates.GroupBy(x => x.ReleaseID))
             {
-                await DownloadReleaseIfItDoesNotExist(grp.Key);
+                await DownloadReleaseIfItDoesNotExist(grp.Key, cancellationToken);
 
                 foreach (FredReleaseDate releaseDate in grp)
                     await SaveReleaseDate(releaseDate, false);
@@ -53,7 +53,7 @@ public class ReleasesService : BaseService, IReleasesService
     
 
 
-    public async Task<RowOpResult> DownloadRelease(string releaseID)
+    public async Task<RowOpResult> DownloadRelease(string releaseID, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(releaseID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadRelease), releaseID);
@@ -68,13 +68,13 @@ public class ReleasesService : BaseService, IReleasesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadReleaseDates(string releaseID)
+    public async Task<RowOpResult> DownloadReleaseDates(string releaseID, CancellationToken? cancellationToken)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(releaseID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseDates), releaseID);
         Status($"Downloading release dates for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
-        await DownloadReleaseIfItDoesNotExist(releaseID);
+        await DownloadReleaseIfItDoesNotExist(releaseID, cancellationToken);
         DateTime? maxDate = db.ReleaseDates.Where(x => x.ReleaseID == releaseID).Max(x => x == null ? null as DateTime? : x.DateReleased);
         List<FredReleaseDate> dates = await fredClient.GetReleaseDatesForRelease(releaseID, maxDate, true);
 
@@ -90,13 +90,13 @@ public class ReleasesService : BaseService, IReleasesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadReleaseSeries(string releaseID)
+    public async Task<RowOpResult> DownloadReleaseSeries(string releaseID, CancellationToken? cancellationToken)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(releaseID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseSeries), releaseID);
         Status($"Downloading series for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
-        await DownloadReleaseIfItDoesNotExist(releaseID);
+        await DownloadReleaseIfItDoesNotExist(releaseID, cancellationToken);
         List<FredSeries> seriess = await fredClient.GetSeriesForRelease(releaseID);
 
         if (seriess?.Any() ?? false)
@@ -120,7 +120,7 @@ public class ReleasesService : BaseService, IReleasesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadReleaseForSeries(string symbol, bool saveChanges = true)
+    public async Task<RowOpResult> DownloadReleaseForSeries(string symbol, CancellationToken? cancellationToken, bool saveChanges = true)
     {
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         logger.LogDebug("Starting {m}. Parameters are {p1}, {p1}", nameof(DownloadReleaseForSeries), symbol, saveChanges);
@@ -130,13 +130,13 @@ public class ReleasesService : BaseService, IReleasesService
         return await SaveRelease(release, saveChanges);
     }
 
-    public async Task<RowOpResult> DownloadReleaseSources(string releaseID)
+    public async Task<RowOpResult> DownloadReleaseSources(string releaseID, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(releaseID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseSources), releaseID);
         Status($"Downloading release sources for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
-        await DownloadReleaseIfItDoesNotExist(releaseID);
+        await DownloadReleaseIfItDoesNotExist(releaseID, cancellationToken);
         List<FredSource> sources = await fredClient.GetSourcesForRelease(releaseID);
 
         if (sources?.Any() ?? false)
@@ -151,13 +151,13 @@ public class ReleasesService : BaseService, IReleasesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadSourceReleases(string sourceID)
+    public async Task<RowOpResult> DownloadSourceReleases(string sourceID, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(sourceID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSourceReleases), sourceID);
         Status($"Downloading releases for sourceID {sourceID}");
         RowOpResult result = new RowOpResult();
-        await DownloadSourceIfItDoesNotExist(sourceID);
+        await DownloadSourceIfItDoesNotExist(sourceID, cancellationToken);
         List<FredRelease> releases = await fredClient.GetReleasesForSource(sourceID);
 
         if (releases?.Any() ?? false)
@@ -172,7 +172,7 @@ public class ReleasesService : BaseService, IReleasesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadAllSources()
+    public async Task<RowOpResult> DownloadAllSources(CancellationToken? cancellationToken)
     {
         logger.LogDebug("Starting {m}.", nameof(DownloadAllSources));
         RowOpResult result = new RowOpResult();
@@ -190,7 +190,7 @@ public class ReleasesService : BaseService, IReleasesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadSource(string sourceID)
+    public async Task<RowOpResult> DownloadSource(string sourceID, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(sourceID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSource), sourceID);
@@ -326,23 +326,23 @@ public class ReleasesService : BaseService, IReleasesService
         return result;
     }
 
-    private async Task DownloadReleaseIfItDoesNotExist(string releaseID)
+    private async Task DownloadReleaseIfItDoesNotExist(string releaseID, CancellationToken? cancellationToken)
     {
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseIfItDoesNotExist), releaseID);
         
         if ((await db.Releases.FirstOrDefaultAsync(x => x.NativeID == releaseID)) is null)
-            if (!(await DownloadRelease(releaseID)).Success)
+            if (!(await DownloadRelease(releaseID, cancellationToken)).Success)
                 throw new Exception($"Invalid releaseID: {releaseID}");
 
         logger.LogDebug("{m} complete.", nameof(DownloadReleaseIfItDoesNotExist));
     }
 
-    private async Task DownloadSourceIfItDoesNotExist(string sourceID)
+    private async Task DownloadSourceIfItDoesNotExist(string sourceID, CancellationToken? cancellationToken)
     {
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSourceIfItDoesNotExist), sourceID);
 
         if ((await db.Sources.FirstOrDefaultAsync(x => x.NativeID == sourceID)) is null)
-            if (!(await DownloadSource(sourceID)).Success)
+            if (!(await DownloadSource(sourceID, cancellationToken)).Success)
                 throw new Exception($"Invalid sourceID: {sourceID}");
 
         logger.LogDebug("{m} complete.", nameof(DownloadSourceIfItDoesNotExist));

@@ -9,23 +9,22 @@ public class DownloadService : BaseService, IDownloadService
         
     }
 
-    public async Task<APIResult> Download(FredDownloadArgs args, Action<string> statusCallback)
+    public async Task<APIResult> Download(FredDownloadArgs args, CancellationToken? cancellationToken)
     {
         logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(DownloadService.Download), args);
-        this.statusCallback = statusCallback;
         ArgumentNullException.ThrowIfNull(args);
         this.args = args;
 
         if (!string.IsNullOrEmpty(args.CategoryID))
-            return await DownloadCategoryPath(args.CategoryID);
+            return await DownloadCategoryPath(args.CategoryID, cancellationToken);
         else if (args.Symbols?.Any() ?? false)
-            return await DownloadSymbolPath(args.Symbols);
+            return await DownloadSymbolPath(args.Symbols, cancellationToken);
         else
             throw new Exception("A CategoryID or one or more symbols must be set on FredDownloadArgs.");
     }
 
 
-    private async Task<APIResult> DownloadSymbolPath(string[] symbols)
+    private async Task<APIResult> DownloadSymbolPath(string[] symbols, CancellationToken? cancellationToken)
     {
         logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(DownloadService.DownloadSymbolPath), symbols);
            
@@ -38,28 +37,28 @@ public class DownloadService : BaseService, IDownloadService
         // It does not make sense to download any object further down the hierarchy if
         // series does not exist.  Always download series.
         
-        await serviceManifest.SeriesService.DownloadSeries(symbols);
+        await serviceManifest.SeriesService.DownloadSeries(symbols, cancellationToken);
 
-        await DownloadSymbolBasedObjects(symbols);
+        await DownloadSymbolBasedObjects(symbols, cancellationToken);
 
         if (args.SeriesCategories)
         {
             foreach (string symbol in symbols)
             {
-                await serviceManifest.CategoriesService.DownloadCategoriesForSeries(symbol);
+                await serviceManifest.CategoriesService.DownloadCategoriesForSeries(symbol, cancellationToken);
                 List<FredCategory> categories = await serviceManifest.CategoriesService.GetLocalCategoriesForSeries(symbol);
 
                 if(args.ChildCategories)
                     foreach (FredCategory category in categories)
-                        await serviceManifest.CategoriesService.DownloadCategoryChildren(category.NativeID);
+                        await serviceManifest.CategoriesService.DownloadCategoryChildren(category.NativeID, cancellationToken);
 
                 if (args.RelatedCategories)
                     foreach (FredCategory category in categories)
-                        await serviceManifest.CategoriesService.DownloadRelatedCategories(category.NativeID);
+                        await serviceManifest.CategoriesService.DownloadRelatedCategories(category.NativeID, cancellationToken);
 
                 if(args.CategoryTags)
                     foreach (FredCategory category in categories)
-                        await serviceManifest.CategoriesService.DownloadCategoryTags(category.NativeID);
+                        await serviceManifest.CategoriesService.DownloadCategoryTags(category.NativeID, cancellationToken);
             }
         }
 
@@ -70,7 +69,7 @@ public class DownloadService : BaseService, IDownloadService
     }
 
 
-    private async Task<APIResult> DownloadCategoryPath(string categoryID)
+    private async Task<APIResult> DownloadCategoryPath(string categoryID, CancellationToken? cancellationToken)
     {
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadService.DownloadCategoryPath), categoryID);
         APIResult result = new();
@@ -79,22 +78,22 @@ public class DownloadService : BaseService, IDownloadService
         {
             // It does not make sense to download any object further down the hierarchy if
             // series does not exist.  Always download series.
-            await serviceManifest.CategoriesService.DownloadCategorySeries(categoryID, args.IncludeDiscontinuedSeries);
+            await serviceManifest.CategoriesService.DownloadCategorySeries(categoryID, cancellationToken, args.IncludeDiscontinuedSeries);
 
             // Get symbols for every series in the category
             string[] symbols = ((await serviceManifest.SeriesService.GetLocalSeriesForCategory(null,null,categoryID))?.Select(x => x.Symbol) ?? Enumerable.Empty<string>()).ToArray();
 
-            await DownloadSymbolBasedObjects(symbols);
+            await DownloadSymbolBasedObjects(symbols, cancellationToken);
         }
         
         if(args.ChildCategories)
-            await serviceManifest.CategoriesService.DownloadCategoryChildren(categoryID);
+            await serviceManifest.CategoriesService.DownloadCategoryChildren(categoryID, cancellationToken);
 
         if (args.RelatedCategories)
-            await serviceManifest.CategoriesService.DownloadRelatedCategories(categoryID);
+            await serviceManifest.CategoriesService.DownloadRelatedCategories(categoryID, cancellationToken);
 
         if (args.CategoryTags)
-                await serviceManifest.CategoriesService.DownloadCategoryTags(categoryID);
+                await serviceManifest.CategoriesService.DownloadCategoryTags(categoryID, cancellationToken);
 
         await db.SaveChangesAsync();
 
@@ -103,7 +102,7 @@ public class DownloadService : BaseService, IDownloadService
             List<FredCategory> childCategories = await serviceManifest.CategoriesService.GetLocalChildCategories(categoryID);
             
             foreach (FredCategory childCategory in childCategories)
-                await DownloadCategoryPath(childCategory.NativeID);
+                await DownloadCategoryPath(childCategory.NativeID, cancellationToken);
         }
         result.Success = true;
         logger.LogDebug("{m} complete.", nameof(DownloadService.DownloadCategoryPath));
@@ -111,22 +110,22 @@ public class DownloadService : BaseService, IDownloadService
     }
 
 
-    private async Task DownloadSymbolBasedObjects(string[] symbols)
+    private async Task DownloadSymbolBasedObjects(string[] symbols, CancellationToken? cancellationToken)
     {
         logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(DownloadService.DownloadSymbolBasedObjects), symbols);
         // If called by DownloadSymbolPath, symbols are an arbitrary list input by the user.
         // If called by DownloadCategoryPath, symbols are all series within a category.
 
         if (args.Observations)
-            await serviceManifest.ObservationsService.DownloadObservations(symbols);
+            await serviceManifest.ObservationsService.DownloadObservations(symbols, cancellationToken);
 
         if (args.SeriesTags)
             foreach (string symbol in symbols)
-                await serviceManifest.SeriesService.DownloadSeriesTags(symbol);
+                await serviceManifest.SeriesService.DownloadSeriesTags(symbol, cancellationToken);
 
         if (args.Releases || args.Sources || args.ReleaseDates)
             foreach (string symbol in symbols)
-                await serviceManifest.SeriesService.DownloadSeriesRelease(symbol);
+                await serviceManifest.SeriesService.DownloadSeriesRelease(symbol, cancellationToken);
 
 
         if (args.Sources || args.ReleaseDates)
@@ -138,10 +137,10 @@ public class DownloadService : BaseService, IDownloadService
                 if (series is not null && !string.IsNullOrEmpty(series.ReleaseID))
                 {
                     if (args.Sources)
-                        await serviceManifest.ReleasesService.DownloadReleaseSources(series.ReleaseID);
+                        await serviceManifest.ReleasesService.DownloadReleaseSources(series.ReleaseID, cancellationToken);
 
                     if (args.ReleaseDates)
-                        await serviceManifest.ReleasesService.DownloadReleaseDates(series.ReleaseID);
+                        await serviceManifest.ReleasesService.DownloadReleaseDates(series.ReleaseID, cancellationToken);
                 }
             }
         }

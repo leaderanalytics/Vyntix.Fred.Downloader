@@ -1,4 +1,6 @@
-﻿namespace LeaderAnalytics.Vyntix.Fred.Downloader;
+﻿using System.Threading;
+
+namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public class SeriesService : BaseService, ISeriesService
 {
@@ -7,7 +9,7 @@ public class SeriesService : BaseService, ISeriesService
 
     }
 
-    public async Task<List<RowOpResult>> DownloadSeries(string[] symbols, string? releaseID = null)
+    public async Task<List<RowOpResult>> DownloadSeries(string[] symbols, CancellationToken? cancellationToken, string? releaseID = null)
     {
         ArgumentNullException.ThrowIfNull(symbols);
         logger.LogDebug("Starting {m}. Parameters are {@p1}, {p2}", nameof(DownloadSeries), symbols, releaseID);
@@ -16,7 +18,7 @@ public class SeriesService : BaseService, ISeriesService
 
         foreach (string symbol in symbols)
         {
-            RowOpResult result = await DownloadSeries(symbol, releaseID);
+            RowOpResult result = await DownloadSeries(symbol, cancellationToken, releaseID);
             
             if (result.Success)
                 result.Message = symbol;
@@ -28,7 +30,7 @@ public class SeriesService : BaseService, ISeriesService
     }
 
 
-    public async Task<RowOpResult> DownloadSeries(string symbol, string? releaseID = null)
+    public async Task<RowOpResult> DownloadSeries(string symbol, CancellationToken? cancellationToken, string? releaseID = null)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(symbol);
         logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(DownloadSeries), symbol, releaseID);
@@ -51,7 +53,7 @@ public class SeriesService : BaseService, ISeriesService
 
   
 
-    public async Task<RowOpResult> DownloadSeriesRelease(string symbol)
+    public async Task<RowOpResult> DownloadSeriesRelease(string symbol, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeriesRelease), symbol);
@@ -65,11 +67,11 @@ public class SeriesService : BaseService, ISeriesService
             return result;
         }
 
-        FredSeries? series = (await DownloadSeriesIfItDoesNotExist(symbol)).Item;
+        FredSeries? series = (await DownloadSeriesIfItDoesNotExist(symbol, cancellationToken)).Item;
 
         if (series is null)
         {
-            RowOpResult seriesResult = await DownloadSeries(symbol, release.NativeID);
+            RowOpResult seriesResult = await DownloadSeries(symbol, cancellationToken, release.NativeID);
 
             if (!seriesResult.Success)
                 return seriesResult;
@@ -87,7 +89,7 @@ public class SeriesService : BaseService, ISeriesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadSeriesTags(string symbol)
+    public async Task<RowOpResult> DownloadSeriesTags(string symbol, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeries), symbol);
@@ -119,7 +121,7 @@ public class SeriesService : BaseService, ISeriesService
         return result;
     }
 
-    public async Task<RowOpResult<FredSeries>> DownloadSeriesIfItDoesNotExist(string symbol)
+    public async Task<RowOpResult<FredSeries>> DownloadSeriesIfItDoesNotExist(string symbol, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeriesIfItDoesNotExist), symbol);
@@ -131,7 +133,7 @@ public class SeriesService : BaseService, ISeriesService
 
         if (result.Item is null)
         {
-            await DownloadSeries(symbol);
+            await DownloadSeries(symbol, cancellationToken);
             id = (await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol))?.ID;
             result.Item = await db.Series.FindAsync(id);
         }

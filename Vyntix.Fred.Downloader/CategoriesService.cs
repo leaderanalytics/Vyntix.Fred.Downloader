@@ -8,7 +8,7 @@ public class CategoriesService : BaseService, ICategoriesService
 
     }
 
-    public async Task<RowOpResult> DownloadCategory(string categoryID)
+    public async Task<RowOpResult> DownloadCategory(string categoryID, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(categoryID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategory), categoryID);
@@ -24,7 +24,7 @@ public class CategoriesService : BaseService, ICategoriesService
         
     }
 
-    public async Task<RowOpResult> DownloadCategoryChildren(string categoryID)
+    public async Task<RowOpResult> DownloadCategoryChildren(string categoryID, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(categoryID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoryChildren), categoryID);
@@ -44,7 +44,7 @@ public class CategoriesService : BaseService, ICategoriesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadRelatedCategories(string parentID)
+    public async Task<RowOpResult> DownloadRelatedCategories(string parentID, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(parentID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadRelatedCategories), parentID);
@@ -65,7 +65,7 @@ public class CategoriesService : BaseService, ICategoriesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadCategorySeries(string categoryID, bool includeDiscontinued = false)
+    public async Task<RowOpResult> DownloadCategorySeries(string categoryID, CancellationToken? cancellationToken, bool includeDiscontinued = false)
     {
         ArgumentNullException.ThrowIfNull(categoryID);
         logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(DownloadCategorySeries), categoryID, includeDiscontinued);
@@ -75,7 +75,7 @@ public class CategoriesService : BaseService, ICategoriesService
 
         if (category is null)
         {
-            RowOpResult categoryResult = await DownloadCategory(categoryID);
+            RowOpResult categoryResult = await DownloadCategory(categoryID, cancellationToken);
 
             if (!categoryResult.Success)
                 return categoryResult;
@@ -98,12 +98,12 @@ public class CategoriesService : BaseService, ICategoriesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadCategoriesForSeries(string symbol)
+    public async Task<RowOpResult> DownloadCategoriesForSeries(string symbol, CancellationToken? cancellationToken)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(symbol);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoriesForSeries), symbol);
         Status($"Downloading categories for series {symbol}");
-        RowOpResult seriesResult = await serviceManifest.SeriesService.DownloadSeriesIfItDoesNotExist(symbol);
+        RowOpResult seriesResult = await serviceManifest.SeriesService.DownloadSeriesIfItDoesNotExist(symbol, cancellationToken);
 
         if (!seriesResult.Success)
             return seriesResult;
@@ -126,7 +126,7 @@ public class CategoriesService : BaseService, ICategoriesService
         return result;
     }
 
-    public async Task<RowOpResult> DownloadCategoryTags(string categoryID)
+    public async Task<RowOpResult> DownloadCategoryTags(string categoryID, CancellationToken? cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(categoryID);
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadCategoryTags), categoryID);
