@@ -13,6 +13,10 @@ public class ReleasesService : BaseService, IReleasesService
     {
         logger.LogDebug("Starting {m}.", nameof(DownloadAllReleases));
         RowOpResult result = new RowOpResult();
+
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         List<FredRelease> releases = await fredClient.GetAllReleases();
         
         if (releases?.Any() ?? false)
@@ -31,6 +35,9 @@ public class ReleasesService : BaseService, IReleasesService
     {
         logger.LogDebug("Starting {m}.", nameof(DownloadAllReleaseDates));
         RowOpResult result = new RowOpResult();
+        
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
 
         List<FredReleaseDate> dates = await fredClient.GetAllReleaseDates(null, true);
 
@@ -59,6 +66,10 @@ public class ReleasesService : BaseService, IReleasesService
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadRelease), releaseID);
         Status($"Downloading release for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
+        
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         FredRelease? release = await fredClient.GetRelease(releaseID);
 
         if (release is not null)
@@ -74,6 +85,10 @@ public class ReleasesService : BaseService, IReleasesService
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseDates), releaseID);
         Status($"Downloading release dates for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
+        
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         await DownloadReleaseIfItDoesNotExist(releaseID, cancellationToken);
         DateTime? maxDate = db.ReleaseDates.Where(x => x.ReleaseID == releaseID).Max(x => x == null ? null as DateTime? : x.DateReleased);
         List<FredReleaseDate> dates = await fredClient.GetReleaseDatesForRelease(releaseID, maxDate, true);
@@ -96,6 +111,10 @@ public class ReleasesService : BaseService, IReleasesService
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseSeries), releaseID);
         Status($"Downloading series for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
+
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         await DownloadReleaseIfItDoesNotExist(releaseID, cancellationToken);
         List<FredSeries> seriess = await fredClient.GetSeriesForRelease(releaseID);
 
@@ -125,9 +144,16 @@ public class ReleasesService : BaseService, IReleasesService
         ArgumentException.ThrowIfNullOrEmpty(symbol);
         logger.LogDebug("Starting {m}. Parameters are {p1}, {p1}", nameof(DownloadReleaseForSeries), symbol, saveChanges);
         Status($"Downloading release for symbol {symbol}");
+        
+        RowOpResult result = new RowOpResult();
+
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         FredRelease release = await fredClient.GetReleaseForSeries(symbol);
         logger.LogDebug("{m} complete.", nameof(DownloadReleaseForSeries));
-        return await SaveRelease(release, saveChanges);
+        result = await SaveRelease(release, saveChanges);
+        return result;
     }
 
     public async Task<RowOpResult> DownloadReleaseSources(string releaseID, CancellationToken? cancellationToken)
@@ -136,6 +162,10 @@ public class ReleasesService : BaseService, IReleasesService
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadReleaseSources), releaseID);
         Status($"Downloading release sources for releaseID {releaseID}");
         RowOpResult result = new RowOpResult();
+        
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         await DownloadReleaseIfItDoesNotExist(releaseID, cancellationToken);
         List<FredSource> sources = await fredClient.GetSourcesForRelease(releaseID);
 
@@ -157,6 +187,10 @@ public class ReleasesService : BaseService, IReleasesService
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSourceReleases), sourceID);
         Status($"Downloading releases for sourceID {sourceID}");
         RowOpResult result = new RowOpResult();
+
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         await DownloadSourceIfItDoesNotExist(sourceID, cancellationToken);
         List<FredRelease> releases = await fredClient.GetReleasesForSource(sourceID);
 
@@ -176,6 +210,10 @@ public class ReleasesService : BaseService, IReleasesService
     {
         logger.LogDebug("Starting {m}.", nameof(DownloadAllSources));
         RowOpResult result = new RowOpResult();
+
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         List<FredSource> sources = await fredClient.GetSources();
 
         if (sources?.Any() ?? false)
@@ -196,6 +234,10 @@ public class ReleasesService : BaseService, IReleasesService
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSource), sourceID);
         Status($"Downloading source for sourceID {sourceID}");
         RowOpResult result = new RowOpResult();
+
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         FredSource? source = await fredClient.GetSource(sourceID);
 
         if (source is not null)

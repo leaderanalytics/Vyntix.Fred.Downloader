@@ -45,23 +45,46 @@ public class DownloadService : BaseService, IDownloadService
         {
             foreach (string symbol in symbols)
             {
+                if (cancellationToken?.IsCancellationRequested ?? false)
+                    break;
+
                 await serviceManifest.CategoriesService.DownloadCategoriesForSeries(symbol, cancellationToken);
                 List<FredCategory> categories = await serviceManifest.CategoriesService.GetLocalCategoriesForSeries(symbol);
 
-                if(args.ChildCategories)
+                if (args.ChildCategories)
+                {
                     foreach (FredCategory category in categories)
+                    {
+                        if (cancellationToken?.IsCancellationRequested ?? false)
+                            break;
+
                         await serviceManifest.CategoriesService.DownloadCategoryChildren(category.NativeID, cancellationToken);
+                    }
+                }
 
                 if (args.RelatedCategories)
+                {   
                     foreach (FredCategory category in categories)
+                    {
+                        if (cancellationToken?.IsCancellationRequested ?? false)
+                            break;
+
                         await serviceManifest.CategoriesService.DownloadRelatedCategories(category.NativeID, cancellationToken);
+                    }
+                }
 
                 if(args.CategoryTags)
+                {    
                     foreach (FredCategory category in categories)
+                    {
+                        if (cancellationToken?.IsCancellationRequested ?? false)
+                            break;
+
                         await serviceManifest.CategoriesService.DownloadCategoryTags(category.NativeID, cancellationToken);
+                    }
+                }
             }
         }
-
         await db.SaveChangesAsync();
         result.Success = true;
         logger.LogDebug("{m} complete.", nameof(DownloadService.DownloadSymbolPath));
@@ -83,7 +106,8 @@ public class DownloadService : BaseService, IDownloadService
             // Get symbols for every series in the category
             string[] symbols = ((await serviceManifest.SeriesService.GetLocalSeriesForCategory(null,null,categoryID))?.Select(x => x.Symbol) ?? Enumerable.Empty<string>()).ToArray();
 
-            await DownloadSymbolBasedObjects(symbols, cancellationToken);
+            if (!(cancellationToken?.IsCancellationRequested ?? false))
+                await DownloadSymbolBasedObjects(symbols, cancellationToken);
         }
         
         if(args.ChildCategories)
@@ -97,12 +121,17 @@ public class DownloadService : BaseService, IDownloadService
 
         await db.SaveChangesAsync();
 
-        if (args.Recurse && args.ChildCategories)
+        if (args.Recurse && args.ChildCategories && !(cancellationToken?.IsCancellationRequested ?? false))
         {
             List<FredCategory> childCategories = await serviceManifest.CategoriesService.GetLocalChildCategories(categoryID);
-            
+
             foreach (FredCategory childCategory in childCategories)
+            {
                 await DownloadCategoryPath(childCategory.NativeID, cancellationToken);
+
+                if (cancellationToken?.IsCancellationRequested ?? false)
+                    break;
+            }
         }
         result.Success = true;
         logger.LogDebug("{m} complete.", nameof(DownloadService.DownloadCategoryPath));
@@ -116,19 +145,26 @@ public class DownloadService : BaseService, IDownloadService
         // If called by DownloadSymbolPath, symbols are an arbitrary list input by the user.
         // If called by DownloadCategoryPath, symbols are all series within a category.
 
-        if (args.Observations)
+        if (args.Observations && !(cancellationToken?.IsCancellationRequested ?? false))
             await serviceManifest.ObservationsService.DownloadObservations(symbols, cancellationToken);
 
-        if (args.SeriesTags)
+        if (args.SeriesTags && !(cancellationToken?.IsCancellationRequested ?? false))
             foreach (string symbol in symbols)
                 await serviceManifest.SeriesService.DownloadSeriesTags(symbol, cancellationToken);
 
-        if (args.Releases || args.Sources || args.ReleaseDates)
+        if ((args.Releases || args.Sources || args.ReleaseDates) && !(cancellationToken?.IsCancellationRequested ?? false))
+        {
             foreach (string symbol in symbols)
+            {
                 await serviceManifest.SeriesService.DownloadSeriesRelease(symbol, cancellationToken);
+                
+                if ((cancellationToken?.IsCancellationRequested ?? false))
+                    break;
+            }
+        }
 
 
-        if (args.Sources || args.ReleaseDates)
+        if (args.Sources || args.ReleaseDates && !(cancellationToken?.IsCancellationRequested ?? false))
         {
             foreach (string symbol in symbols)
             {
@@ -142,6 +178,9 @@ public class DownloadService : BaseService, IDownloadService
                     if (args.ReleaseDates)
                         await serviceManifest.ReleasesService.DownloadReleaseDates(series.ReleaseID, cancellationToken);
                 }
+
+                if ((cancellationToken?.IsCancellationRequested ?? false))
+                    break;
             }
         }
         logger.LogDebug("{m} complete.", nameof(DownloadService.DownloadSymbolBasedObjects));

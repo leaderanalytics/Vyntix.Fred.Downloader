@@ -24,11 +24,12 @@ public class ObservationsService : BaseService, IObservationsService
     {
         ArgumentNullException.ThrowIfNull(symbols);
         logger.LogDebug("Starting {m}. Parameters are {@p1}", nameof(DownloadObservations), symbols);
-        
-
         List<RowOpResult> result = new List<RowOpResult>();
 
-        foreach(string symbol in symbols)
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
+        foreach (string symbol in symbols)
             result.Add(await DownloadObservations(symbol, cancellationToken));
 
         logger.LogDebug("{m} complete.", nameof(DownloadObservations));
@@ -48,7 +49,10 @@ public class ObservationsService : BaseService, IObservationsService
             result.Message = seriesResult.Message;
             return result;
         }
-        
+
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         List<FredObservation> observations = new(4000);
         DateTime lastVintageDate = (await db.Observations.Where(x => x.Symbol == symbol).MaxAsync(x => (DateTime?)x.VintageDate))?.AddDays(1) ?? new DateTime(1776, 7, 4);
 

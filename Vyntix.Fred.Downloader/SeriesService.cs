@@ -16,6 +16,9 @@ public class SeriesService : BaseService, ISeriesService
         
         List<RowOpResult> results = new();
 
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return results;
+
         foreach (string symbol in symbols)
         {
             RowOpResult result = await DownloadSeries(symbol, cancellationToken, releaseID);
@@ -24,6 +27,9 @@ public class SeriesService : BaseService, ISeriesService
                 result.Message = symbol;
 
             results.Add(result);
+
+            if (cancellationToken?.IsCancellationRequested ?? false)
+                break;
         }
         logger.LogDebug("{m} complete.", nameof(DownloadSeries));
         return results;
@@ -35,8 +41,13 @@ public class SeriesService : BaseService, ISeriesService
         ArgumentNullException.ThrowIfNullOrEmpty(symbol);
         logger.LogDebug("Starting {m}. Parameters are {p1}, {p2}", nameof(DownloadSeries), symbol, releaseID);
         Status($"Downloading series for symbol {symbol}");
-        FredSeries series = await fredClient.GetSeries(symbol);
         RowOpResult result = new RowOpResult();
+        
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
+        FredSeries series = await fredClient.GetSeries(symbol);
+        
 
         if (series is null)
             result.Message = $"Series with symbol {symbol} was not found.";
@@ -59,6 +70,10 @@ public class SeriesService : BaseService, ISeriesService
         logger.LogDebug("Starting {m}. Parameters are {p1}", nameof(DownloadSeriesRelease), symbol);
         Status($"Downloading release for series symbol {symbol}");
         RowOpResult result = new RowOpResult();
+
+        if (cancellationToken?.IsCancellationRequested ?? false)
+            return result;
+
         FredRelease? release = await fredClient.GetReleaseForSeries(symbol);
         
         if (release is null)
@@ -267,9 +282,9 @@ public class SeriesService : BaseService, ISeriesService
                     join s in db.Series on sc.Symbol equals s.Symbol
                     join c in db.Categories on sc.CategoryID equals c.NativeID
                     where 
-                        (string.IsNullOrEmpty(symbol) || s.Symbol == symbol)
+                        (string.IsNullOrEmpty(symbol) || s.Symbol.Contains(symbol))
                         && (string.IsNullOrEmpty(categoryID) || sc.CategoryID == categoryID)
-                        && (string.IsNullOrEmpty(titleSearchExpression) || c.Name.Contains(titleSearchExpression, StringComparison.InvariantCultureIgnoreCase))
+                        && (string.IsNullOrEmpty(titleSearchExpression) || s.Title.Contains(titleSearchExpression))
                     select s;
 
 
