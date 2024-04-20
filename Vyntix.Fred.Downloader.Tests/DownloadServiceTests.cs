@@ -34,7 +34,7 @@ public class DownloadServiceTests : BaseTest
             Observations = true,
             Recurse = true
         };
-        await client.CallAsync(x => x.DownloadService.Download(args));
+        await client.CallAsync(x => x.DownloadService.Download(args, null));
     }
 
 
@@ -57,7 +57,7 @@ public class DownloadServiceTests : BaseTest
             Observations = true,
             Recurse = true
         };
-        await client.CallAsync(x => x.DownloadService.Download(args));
+        await client.CallAsync(x => x.DownloadService.Download(args, null));
     }
 
 }

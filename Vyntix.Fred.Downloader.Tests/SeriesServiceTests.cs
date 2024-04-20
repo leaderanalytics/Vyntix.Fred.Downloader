@@ -10,7 +10,7 @@ public class SeriesServiceTests: BaseTest
     public async Task DownloadSeriesTest()
     {
         string symbol = "GNP";
-        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol));
+        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol, null));
         Assert.IsTrue(result.Success);
         Assert.That(db.Series.Count(x => x.Symbol == symbol), Is.EqualTo(1));
         Assert.That(db.Series.Where(x => x.Symbol == symbol).All(x => x.LastMetadataCheck > DateTime.MinValue));
@@ -20,13 +20,13 @@ public class SeriesServiceTests: BaseTest
     public async Task DownLoadSeriesAssertHasVintgatesIsTrue()
     {
         string symbol = "GNPCA"; // Has vintages
-        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol));
+        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol, null));
         Assert.IsTrue(result.Success);
         FredSeries? s = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
         Assert.That(s, Is.Not.Null);
         Assert.That(s.HasVintages.HasValue, Is.False);
         // Get observations will set HasVintages
-        RowOpResult obsResult = await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
+        RowOpResult obsResult = await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol, null));
         Assert.IsTrue(obsResult.Success);
         s = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
         Assert.That(s.HasVintages.HasValue, Is.True);
@@ -37,13 +37,13 @@ public class SeriesServiceTests: BaseTest
     public async Task DownLoadSeriesAssertHasVintgatesIsFalse()
     {
         string symbol = "SP500"; // Does not have vintages
-        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol));
+        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol, null));
         Assert.IsTrue(result.Success);
         FredSeries? s = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
         Assert.That(s, Is.Not.Null);
         Assert.That(s.HasVintages.HasValue, Is.False);
         // Get observations will set HasVintages
-        RowOpResult obsResult = await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
+        RowOpResult obsResult = await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol, null));
         Assert.IsTrue(obsResult.Success);
         s = await db.Series.FirstOrDefaultAsync(x => x.Symbol == symbol);
         Assert.That(s.HasVintages.HasValue, Is.True);
@@ -56,7 +56,7 @@ public class SeriesServiceTests: BaseTest
     public async Task DownloadSeriesReleaseTest()
     {
         string symbol = "IRA";
-        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeriesRelease(symbol));
+        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeriesRelease(symbol, null));
         Assert.IsTrue(result.Success);
         FredSeries s = db.Series.First(x => x.Symbol == symbol);
         Assert.That(s, Is.Not.Null);
@@ -67,7 +67,7 @@ public class SeriesServiceTests: BaseTest
     public async Task DownloadSeriesTagsTest()
     {
         string symbol = "STLFSI";
-        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeriesTags(symbol));
+        RowOpResult result = await client.CallAsync(x => x.SeriesService.DownloadSeriesTags(symbol, null));
         Assert.IsTrue(result.Success);
         Assert.That(db.SeriesTags.Count(x => x.Symbol == symbol), Is.GreaterThan(0));
     }
@@ -78,10 +78,10 @@ public class SeriesServiceTests: BaseTest
         string symbol = "AAA";
         
         // Download data
-        RowOpResult seriesResult = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol));
-        RowOpResult obsResult = await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
-        RowOpResult tagsResult = await client.CallAsync(x => x.SeriesService.DownloadSeriesTags(symbol));
-        RowOpResult catResult = await client.CallAsync(x => x.CategoriesService.DownloadCategoriesForSeries(symbol));
+        RowOpResult seriesResult = await client.CallAsync(x => x.SeriesService.DownloadSeries(symbol, null));
+        RowOpResult obsResult = await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol, null));
+        RowOpResult tagsResult = await client.CallAsync(x => x.SeriesService.DownloadSeriesTags(symbol, null));
+        RowOpResult catResult = await client.CallAsync(x => x.CategoriesService.DownloadCategoriesForSeries(symbol, null));
 
         // Make sure data was saved
         Assert.AreNotEqual(0, db.Series.Count(x => x.Symbol == symbol));

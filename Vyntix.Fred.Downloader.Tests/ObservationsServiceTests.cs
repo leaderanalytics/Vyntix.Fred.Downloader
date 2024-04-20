@@ -26,7 +26,7 @@ public class ObservationsServiceTests : BaseTest
     public async Task SeriesStatisticsTest()
     {
         string symbol = "GNPCA";
-        await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
+        await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol, null));
         RowOpResult<SeriesStatistics> stats = await client.CallAsync(x => x.ObservationsService.GetSeriesStatistics(symbol));
         Assert.IsNotNull(stats);
         Assert.IsNotNull(stats.Item);
@@ -37,7 +37,7 @@ public class ObservationsServiceTests : BaseTest
     public async Task LastUpdateTest()
     {
         string symbol = "CORESTICKM159SFRBATL";
-        await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol));
+        await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol, null));
         DateTime lastObsCheck = db.Series.First(x => x.Symbol == symbol).LastObsCheck;
         Assert.That(lastObsCheck > DateTime.Now.AddMinutes(-5));
     }
