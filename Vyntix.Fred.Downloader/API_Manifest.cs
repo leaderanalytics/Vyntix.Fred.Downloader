@@ -7,4 +7,5 @@ public class API_Manifest : ServiceManifestFactory, IAPI_Manifest
     public IReleasesService ReleasesService => Create<IReleasesService>();
     public ISeriesService SeriesService => Create<ISeriesService>();
     public ICategoriesService CategoriesService => Create<ICategoriesService>();
+    public IAuthenticationService AuthenticationService => Create<IAuthenticationService>();
 }
