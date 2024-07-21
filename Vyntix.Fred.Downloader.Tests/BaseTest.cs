@@ -2,6 +2,7 @@
 using LeaderAnalytics.Vyntix.Fred.Domain.Downloader;
 using LeaderAnalytics.Vyntix.Fred.StagingDb;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog.Events;
 
 namespace LeaderAnalytics.Vyntix.Fred.Downloader.Tests;
@@ -23,13 +24,16 @@ public abstract class BaseTest
     public BaseTest(string currentProviderName)
     {
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore",LogEventLevel.Verbose)
+            .MinimumLevel.Verbose() // This is required - the Override above only applies to "Microsoft.AspNetCore"
             .Enrich.FromLogContext()
             .WriteTo.Console()
-            .WriteTo.File("logs", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, buffered: false)
+            .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day, buffered: false)
             .CreateLogger();
 
+
         Log.Information("Logger created.");
+        Log.Debug("Debug");
         CurrentProviderName = currentProviderName;  // Passed in by NUnit from the TestFixture attribute
         // Load all endpoints and make them active
         endPoints = EndPointUtilities.LoadEndPoints("appsettings.development.json", false).ToList();
@@ -47,10 +51,12 @@ public abstract class BaseTest
             services.AddFredClient()
             .UseAPIKey(apiKey)
             .UseConfig(x => new FredClientConfig { MaxDownloadRetries = 3 });
+            services.AddLogging(x => x.AddSerilog(Log.Logger));
 
             // Setting MaxDownloadRetries to 1 will cause FredClient to abort on the first 429 error
 
         })
+        
         .UseServiceProviderFactory(new AutofacServiceProviderFactory())
         .ConfigureContainer<ContainerBuilder>((config, containerBuilder) =>
         {

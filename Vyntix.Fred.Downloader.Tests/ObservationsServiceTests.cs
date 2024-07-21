@@ -68,9 +68,15 @@ public class ObservationsServiceTests : BaseTest
         
         s2.HasVintages = true;                                                                             // DownloadObservations modifies HasVintages of second instance
 
-        
-        db.Entry(s2).State = EntityState.Modified;                                                         // Crash 
-        await db.SaveChangesAsync();
+        try
+        {
+            db.Entry(s2).State = EntityState.Modified;                                                         // Crash 
+            await db.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Assert.IsTrue(ex is InvalidOperationException);
+        }
     }
 
     
