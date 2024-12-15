@@ -11,7 +11,7 @@ public class CategoryServiceTests : BaseTest
     {
         string id = "125";
         RowOpResult result = await client.CallAsync(x => x.CategoriesService.DownloadCategory(id, null));
-        Assert.IsTrue(result.Success);
+        Assert.That(result.Success, Is.True);
     }
 
     [Test]
@@ -19,7 +19,7 @@ public class CategoryServiceTests : BaseTest
     {
         string id = "13";
         RowOpResult result = await client.CallAsync(x => x.CategoriesService.DownloadCategoryChildren(id, null), EndPoint.Name);
-        Assert.IsTrue(result.Success);
+        Assert.That(result.Success, Is.True);
         Assert.That(db.Categories.Count(x => x.ParentID == id).Equals(6));
     }
 
@@ -28,7 +28,7 @@ public class CategoryServiceTests : BaseTest
     {
         string id = "32073";
         RowOpResult result = await client.CallAsync(x => x.CategoriesService.DownloadRelatedCategories(id, null));
-        Assert.IsTrue(result.Success);
+        Assert.That(result.Success, Is.True);
         Assert.That(db.RelatedCategories.Count(x => x.CategoryID == id).Equals(7));
     }
 
@@ -37,7 +37,7 @@ public class CategoryServiceTests : BaseTest
     {
         string id = "125";
         RowOpResult result = await client.CallAsync(x => x.CategoriesService.DownloadCategorySeries(id, null));
-        Assert.IsTrue(result.Success);
+        Assert.That(result.Success, Is.True);
         Assert.That(db.SeriesCategories.Count(x => x.CategoryID == id) > 5);
     }
 
@@ -47,7 +47,7 @@ public class CategoryServiceTests : BaseTest
     {
         string id = "125";
         RowOpResult result = await client.CallAsync(x => x.CategoriesService.DownloadCategoryTags(id, null));
-        Assert.IsTrue(result.Success);
+        Assert.That(result.Success, Is.True);
         Assert.That(db.CategoryTags.Count(x => x.CategoryID == id) > 20);
     }
 
@@ -56,7 +56,7 @@ public class CategoryServiceTests : BaseTest
     {
         string symbol = "EXJPUS";
         RowOpResult result = await client.CallAsync(x => x.CategoriesService.DownloadCategoriesForSeries(symbol, null));
-        Assert.IsTrue(result.Success);
+        Assert.That(result.Success, Is.True);
         Assert.That(db.SeriesCategories.Count(x => x.Symbol == symbol), Is.EqualTo(2));
     }
 }

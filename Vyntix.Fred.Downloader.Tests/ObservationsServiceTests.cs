@@ -18,7 +18,7 @@ public class ObservationsServiceTests : BaseTest
         {
             int dbCount = db.Observations.Count(x => x.Symbol == symbol);
             int memCount = data.Item.Count(x => x.Symbol == symbol);
-            Assert.AreEqual(dbCount, memCount);
+            Assert.That(dbCount, Is.EqualTo(memCount));
         }
     }
     
@@ -28,9 +28,9 @@ public class ObservationsServiceTests : BaseTest
         string symbol = "GNPCA";
         await client.CallAsync(x => x.ObservationsService.DownloadObservations(symbol, null));
         RowOpResult<SeriesStatistics> stats = await client.CallAsync(x => x.ObservationsService.GetSeriesStatistics(symbol));
-        Assert.IsNotNull(stats);
-        Assert.IsNotNull(stats.Item);
-        Assert.IsTrue(stats.Success);
+        Assert.That(stats, Is.Not.Null);
+        Assert.That(stats.Item, Is.Not.Null);
+        Assert.That(stats.Success, Is.True);
     }
 
     [Test]
@@ -75,7 +75,7 @@ public class ObservationsServiceTests : BaseTest
         }
         catch (Exception ex)
         {
-            Assert.IsTrue(ex is InvalidOperationException);
+            Assert.That(ex is InvalidOperationException, Is.True);
         }
     }
 
