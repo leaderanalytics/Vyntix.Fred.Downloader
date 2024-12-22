@@ -6,26 +6,24 @@ namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public static class ServiceCollectionExtensions
 {
-    public static RegistrationValues AddFredDownloaderServices(this ContainerBuilder containerBuilder, IEnumerable<IEndPointConfiguration> endpoints) => new RegistrationValues(containerBuilder, endpoints);
+    public static RegistrationValues AddFredDownloaderServices(this ContainerBuilder containerBuilder) => new RegistrationValues(containerBuilder);
 }
 
 
 public class RegistrationValues
 {
     private readonly ContainerBuilder containerBuilder;
-    private IEnumerable<IEndPointConfiguration> endpoints;
 
-    public RegistrationValues(ContainerBuilder containerBuilder, IEnumerable<IEndPointConfiguration> endpoints)
+    public RegistrationValues(ContainerBuilder containerBuilder)
     { 
         this.containerBuilder = containerBuilder;
-        this.endpoints = endpoints;
         Build();
     }
 
     private void Build() 
     {
         RegistrationHelper registrationHelper = new RegistrationHelper(containerBuilder);
-        new AdaptiveClientModule(endpoints).Register(registrationHelper);
+        new AdaptiveClientModule().Register(registrationHelper);
         containerBuilder.RegisterModule(new AutofacModule());
     }
 }

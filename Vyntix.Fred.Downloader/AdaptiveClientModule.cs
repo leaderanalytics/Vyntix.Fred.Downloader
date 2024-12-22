@@ -2,19 +2,18 @@
 
 public class AdaptiveClientModule : IAdaptiveClientModule
 {
-    private readonly IEnumerable<IEndPointConfiguration> endPoints;
 
-    public AdaptiveClientModule(IEnumerable<IEndPointConfiguration> endPoints) => this.endPoints = endPoints ?? throw new ArgumentNullException(nameof(endPoints));
+    public AdaptiveClientModule()
+    { 
+    }
 
     public void Register(RegistrationHelper registrationHelper)
     {
         ArgumentNullException.ThrowIfNull(registrationHelper);
-        ArgumentNullException.ThrowIfNull(endPoints);
 
         registrationHelper
 
-            // Always register endPoints first
-            .RegisterEndPoints(endPoints)
+            // Always register endPoints first in top level app
 
             // EndPoint Validator
             .RegisterEndPointValidator<MSSQL_EndPointValidator>(EndPointType.InProcess, DatabaseProviderName.MSSQL)
