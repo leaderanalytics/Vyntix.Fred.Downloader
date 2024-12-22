@@ -60,7 +60,9 @@ public abstract class BaseTest
         .UseServiceProviderFactory(new AutofacServiceProviderFactory())
         .ConfigureContainer<ContainerBuilder>((config, containerBuilder) =>
         {
-            containerBuilder.AddFredDownloaderServices(endPoints);
+            RegistrationHelper registrationHelper = new RegistrationHelper(containerBuilder);
+            registrationHelper.RegisterEndPoints(endPoints);
+            registrationHelper.AddFredDownloaderServices();
         }).Build();
 
         scope = host.Services.GetAutofacRoot().BeginLifetimeScope();

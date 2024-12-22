@@ -1,29 +1,16 @@
-﻿using Autofac;
-using Microsoft.Extensions.DependencyInjection;
-using System.Net;
-
-namespace LeaderAnalytics.Vyntix.Fred.Downloader;
+﻿namespace LeaderAnalytics.Vyntix.Fred.Downloader;
 
 public static class ServiceCollectionExtensions
 {
-    public static RegistrationValues AddFredDownloaderServices(this ContainerBuilder containerBuilder) => new RegistrationValues(containerBuilder);
+    public static RegistrationValues AddFredDownloaderServices(this RegistrationHelper registrationHelper) => new RegistrationValues(registrationHelper);
 }
 
 
 public class RegistrationValues
 {
-    private readonly ContainerBuilder containerBuilder;
-
-    public RegistrationValues(ContainerBuilder containerBuilder)
+    public RegistrationValues(RegistrationHelper registrationHelper)
     { 
-        this.containerBuilder = containerBuilder;
-        Build();
-    }
-
-    private void Build() 
-    {
-        RegistrationHelper registrationHelper = new RegistrationHelper(containerBuilder);
         new AdaptiveClientModule().Register(registrationHelper);
-        containerBuilder.RegisterModule(new AutofacModule());
+        registrationHelper.Builder.RegisterModule(new AutofacModule());
     }
 }
