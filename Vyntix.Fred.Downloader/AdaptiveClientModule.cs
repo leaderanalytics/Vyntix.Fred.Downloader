@@ -31,8 +31,8 @@ public class AdaptiveClientModule : IAdaptiveClientModule
             .RegisterMigrationContext<FREDStagingDbMySQL>(API_Name.FRED_Staging, DatabaseProviderName.MySQL)
 
             // Database Initializers
-            .RegisterDatabaseInitializer<DatabaseInitializer>(API_Name.FRED_Staging, DatabaseProviderName.MSSQL)
-            .RegisterDatabaseInitializer<DatabaseInitializer>(API_Name.FRED_Staging, DatabaseProviderName.MySQL)
+            .RegisterDatabaseInitializer<LeaderAnalytics.Vyntix.Fred.StagingDb.StagingDataMigrator_MSSQL>(API_Name.FRED_Staging, DatabaseProviderName.MSSQL)
+            .RegisterDatabaseInitializer<LeaderAnalytics.Vyntix.Fred.StagingDb.StagingDataMigrator_MySQL>(API_Name.FRED_Staging, DatabaseProviderName.MySQL)
 
             // Service Manifests
             .RegisterServiceManifest<API_Manifest, IAPI_Manifest>(EndPointType.InProcess, API_Name.FRED_Staging, DatabaseProviderName.MSSQL)
